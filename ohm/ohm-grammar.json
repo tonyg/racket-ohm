@@ -1,0 +1,1894 @@
+{
+  "startGrammar": "Ohm",
+  "grammars": {
+    "Ohm": {
+      "name": "Ohm",
+      "superGrammar": "BuiltInRules",
+      "defaultStartRule": "Grammars",
+      "definitions": {
+        "Grammars": {
+          "name": "Grammars",
+          "formals": [],
+          "body": {
+            "type": "star",
+            "expr": {
+              "type": "app",
+              "rule": "Grammar"
+            }
+          }
+        },
+        "Grammar": {
+          "name": "Grammar",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "app",
+                "rule": "ident"
+              },
+              {
+                "type": "opt",
+                "expr": {
+                  "type": "app",
+                  "rule": "SuperGrammar"
+                }
+              },
+              {
+                "type": "prim",
+                "obj": "{"
+              },
+              {
+                "type": "star",
+                "expr": {
+                  "type": "app",
+                  "rule": "Rule"
+                }
+              },
+              {
+                "type": "prim",
+                "obj": "}"
+              }
+            ]
+          }
+        },
+        "SuperGrammar": {
+          "name": "SuperGrammar",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "<:"
+              },
+              {
+                "type": "app",
+                "rule": "ident"
+              }
+            ]
+          }
+        },
+        "Rule_define": {
+          "name": "Rule_define",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "app",
+                "rule": "ident"
+              },
+              {
+                "type": "opt",
+                "expr": {
+                  "type": "app",
+                  "rule": "Formals"
+                }
+              },
+              {
+                "type": "opt",
+                "expr": {
+                  "type": "app",
+                  "rule": "ruleDescr"
+                }
+              },
+              {
+                "type": "prim",
+                "obj": "="
+              },
+              {
+                "type": "app",
+                "rule": "Alt"
+              }
+            ]
+          }
+        },
+        "Rule_override": {
+          "name": "Rule_override",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "app",
+                "rule": "ident"
+              },
+              {
+                "type": "opt",
+                "expr": {
+                  "type": "app",
+                  "rule": "Formals"
+                }
+              },
+              {
+                "type": "prim",
+                "obj": ":="
+              },
+              {
+                "type": "app",
+                "rule": "Alt"
+              }
+            ]
+          }
+        },
+        "Rule_extend": {
+          "name": "Rule_extend",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "app",
+                "rule": "ident"
+              },
+              {
+                "type": "opt",
+                "expr": {
+                  "type": "app",
+                  "rule": "Formals"
+                }
+              },
+              {
+                "type": "prim",
+                "obj": "+="
+              },
+              {
+                "type": "app",
+                "rule": "Alt"
+              }
+            ]
+          }
+        },
+        "Rule": {
+          "name": "Rule",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "app",
+                "rule": "Rule_define"
+              },
+              {
+                "type": "app",
+                "rule": "Rule_override"
+              },
+              {
+                "type": "app",
+                "rule": "Rule_extend"
+              }
+            ]
+          }
+        },
+        "Formals": {
+          "name": "Formals",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "<"
+              },
+              {
+                "type": "app",
+                "rule": "ListOf",
+                "args": [
+                  {
+                    "type": "app",
+                    "rule": "ident"
+                  },
+                  {
+                    "type": "prim",
+                    "obj": ","
+                  }
+                ]
+              },
+              {
+                "type": "prim",
+                "obj": ">"
+              }
+            ]
+          }
+        },
+        "Params": {
+          "name": "Params",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "<"
+              },
+              {
+                "type": "app",
+                "rule": "ListOf",
+                "args": [
+                  {
+                    "type": "app",
+                    "rule": "Seq"
+                  },
+                  {
+                    "type": "prim",
+                    "obj": ","
+                  }
+                ]
+              },
+              {
+                "type": "prim",
+                "obj": ">"
+              }
+            ]
+          }
+        },
+        "Alt": {
+          "name": "Alt",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "app",
+                "rule": "Term"
+              },
+              {
+                "type": "star",
+                "expr": {
+                  "type": "seq",
+                  "factors": [
+                    {
+                      "type": "prim",
+                      "obj": "|"
+                    },
+                    {
+                      "type": "app",
+                      "rule": "Term"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "Term_inline": {
+          "name": "Term_inline",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "app",
+                "rule": "Seq"
+              },
+              {
+                "type": "app",
+                "rule": "caseName"
+              }
+            ]
+          }
+        },
+        "Term": {
+          "name": "Term",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "app",
+                "rule": "Term_inline"
+              },
+              {
+                "type": "app",
+                "rule": "Seq"
+              }
+            ]
+          }
+        },
+        "Seq": {
+          "name": "Seq",
+          "formals": [],
+          "body": {
+            "type": "star",
+            "expr": {
+              "type": "app",
+              "rule": "Iter"
+            }
+          }
+        },
+        "Iter_star": {
+          "name": "Iter_star",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "app",
+                "rule": "Pred"
+              },
+              {
+                "type": "prim",
+                "obj": "*"
+              }
+            ]
+          }
+        },
+        "Iter_plus": {
+          "name": "Iter_plus",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "app",
+                "rule": "Pred"
+              },
+              {
+                "type": "prim",
+                "obj": "+"
+              }
+            ]
+          }
+        },
+        "Iter_opt": {
+          "name": "Iter_opt",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "app",
+                "rule": "Pred"
+              },
+              {
+                "type": "prim",
+                "obj": "?"
+              }
+            ]
+          }
+        },
+        "Iter": {
+          "name": "Iter",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "app",
+                "rule": "Iter_star"
+              },
+              {
+                "type": "app",
+                "rule": "Iter_plus"
+              },
+              {
+                "type": "app",
+                "rule": "Iter_opt"
+              },
+              {
+                "type": "app",
+                "rule": "Pred"
+              }
+            ]
+          }
+        },
+        "Pred_not": {
+          "name": "Pred_not",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "~"
+              },
+              {
+                "type": "app",
+                "rule": "Modifier"
+              }
+            ]
+          }
+        },
+        "Pred_lookahead": {
+          "name": "Pred_lookahead",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "&"
+              },
+              {
+                "type": "app",
+                "rule": "Modifier"
+              }
+            ]
+          }
+        },
+        "Pred": {
+          "name": "Pred",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "app",
+                "rule": "Pred_not"
+              },
+              {
+                "type": "app",
+                "rule": "Pred_lookahead"
+              },
+              {
+                "type": "app",
+                "rule": "Modifier"
+              }
+            ]
+          }
+        },
+        "Modifier_lex": {
+          "name": "Modifier_lex",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "#"
+              },
+              {
+                "type": "app",
+                "rule": "Base"
+              }
+            ]
+          }
+        },
+        "Modifier_val": {
+          "name": "Modifier_val",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "$"
+              },
+              {
+                "type": "app",
+                "rule": "Base"
+              }
+            ]
+          }
+        },
+        "Modifier": {
+          "name": "Modifier",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "app",
+                "rule": "Modifier_lex"
+              },
+              {
+                "type": "app",
+                "rule": "Modifier_val"
+              },
+              {
+                "type": "app",
+                "rule": "Base"
+              }
+            ]
+          }
+        },
+        "Base_application": {
+          "name": "Base_application",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "app",
+                "rule": "ident"
+              },
+              {
+                "type": "opt",
+                "expr": {
+                  "type": "app",
+                  "rule": "Params"
+                }
+              },
+              {
+                "type": "not",
+                "expr": {
+                  "type": "alt",
+                  "terms": [
+                    {
+                      "type": "seq",
+                      "factors": [
+                        {
+                          "type": "opt",
+                          "expr": {
+                            "type": "app",
+                            "rule": "ruleDescr"
+                          }
+                        },
+                        {
+                          "type": "prim",
+                          "obj": "="
+                        }
+                      ]
+                    },
+                    {
+                      "type": "prim",
+                      "obj": ":="
+                    },
+                    {
+                      "type": "prim",
+                      "obj": "+="
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "Base_range": {
+          "name": "Base_range",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "app",
+                "rule": "Prim"
+              },
+              {
+                "type": "prim",
+                "obj": ".."
+              },
+              {
+                "type": "app",
+                "rule": "Prim"
+              }
+            ]
+          }
+        },
+        "Base_prim": {
+          "name": "Base_prim",
+          "formals": [],
+          "body": {
+            "type": "app",
+            "rule": "Prim"
+          }
+        },
+        "Base_paren": {
+          "name": "Base_paren",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "("
+              },
+              {
+                "type": "app",
+                "rule": "Alt"
+              },
+              {
+                "type": "prim",
+                "obj": ")"
+              }
+            ]
+          }
+        },
+        "Base_arr": {
+          "name": "Base_arr",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "["
+              },
+              {
+                "type": "app",
+                "rule": "Alt"
+              },
+              {
+                "type": "prim",
+                "obj": "]"
+              }
+            ]
+          }
+        },
+        "Base_obj": {
+          "name": "Base_obj",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "{"
+              },
+              {
+                "type": "opt",
+                "expr": {
+                  "type": "prim",
+                  "obj": "..."
+                }
+              },
+              {
+                "type": "prim",
+                "obj": "}"
+              }
+            ]
+          }
+        },
+        "Base_objWithProps": {
+          "name": "Base_objWithProps",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "{"
+              },
+              {
+                "type": "app",
+                "rule": "Props"
+              },
+              {
+                "type": "opt",
+                "expr": {
+                  "type": "seq",
+                  "factors": [
+                    {
+                      "type": "prim",
+                      "obj": ","
+                    },
+                    {
+                      "type": "prim",
+                      "obj": "..."
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "prim",
+                "obj": "}"
+              }
+            ]
+          }
+        },
+        "Base": {
+          "name": "Base",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "app",
+                "rule": "Base_application"
+              },
+              {
+                "type": "app",
+                "rule": "Base_range"
+              },
+              {
+                "type": "app",
+                "rule": "Base_prim"
+              },
+              {
+                "type": "app",
+                "rule": "Base_paren"
+              },
+              {
+                "type": "app",
+                "rule": "Base_arr"
+              },
+              {
+                "type": "app",
+                "rule": "Base_obj"
+              },
+              {
+                "type": "app",
+                "rule": "Base_objWithProps"
+              }
+            ]
+          }
+        },
+        "Prim": {
+          "name": "Prim",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "app",
+                "rule": "keyword"
+              },
+              {
+                "type": "app",
+                "rule": "string"
+              },
+              {
+                "type": "app",
+                "rule": "number"
+              }
+            ]
+          }
+        },
+        "Props": {
+          "name": "Props",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "app",
+                "rule": "Prop"
+              },
+              {
+                "type": "star",
+                "expr": {
+                  "type": "seq",
+                  "factors": [
+                    {
+                      "type": "prim",
+                      "obj": ","
+                    },
+                    {
+                      "type": "app",
+                      "rule": "Prop"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "Prop": {
+          "name": "Prop",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "alt",
+                "terms": [
+                  {
+                    "type": "app",
+                    "rule": "name"
+                  },
+                  {
+                    "type": "app",
+                    "rule": "string"
+                  }
+                ]
+              },
+              {
+                "type": "prim",
+                "obj": ":"
+              },
+              {
+                "type": "app",
+                "rule": "Alt"
+              }
+            ]
+          }
+        },
+        "ruleDescr": {
+          "name": "ruleDescr",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "("
+              },
+              {
+                "type": "app",
+                "rule": "ruleDescrText"
+              },
+              {
+                "type": "prim",
+                "obj": ")"
+              }
+            ]
+          },
+          "description": "a rule description"
+        },
+        "ruleDescrText": {
+          "name": "ruleDescrText",
+          "formals": [],
+          "body": {
+            "type": "star",
+            "expr": {
+              "type": "seq",
+              "factors": [
+                {
+                  "type": "not",
+                  "expr": {
+                    "type": "prim",
+                    "obj": ")"
+                  }
+                },
+                {
+                  "type": "app",
+                  "rule": "any"
+                }
+              ]
+            }
+          }
+        },
+        "caseName": {
+          "name": "caseName",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "--"
+              },
+              {
+                "type": "star",
+                "expr": {
+                  "type": "seq",
+                  "factors": [
+                    {
+                      "type": "not",
+                      "expr": {
+                        "type": "prim",
+                        "obj": "\n"
+                      }
+                    },
+                    {
+                      "type": "app",
+                      "rule": "space"
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "app",
+                "rule": "name"
+              },
+              {
+                "type": "star",
+                "expr": {
+                  "type": "seq",
+                  "factors": [
+                    {
+                      "type": "not",
+                      "expr": {
+                        "type": "prim",
+                        "obj": "\n"
+                      }
+                    },
+                    {
+                      "type": "app",
+                      "rule": "space"
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "alt",
+                "terms": [
+                  {
+                    "type": "prim",
+                    "obj": "\n"
+                  },
+                  {
+                    "type": "lookahead",
+                    "expr": {
+                      "type": "prim",
+                      "obj": "}"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "name": {
+          "name": "name",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "app",
+                "rule": "nameFirst"
+              },
+              {
+                "type": "star",
+                "expr": {
+                  "type": "app",
+                  "rule": "nameRest"
+                }
+              }
+            ]
+          },
+          "description": "a name"
+        },
+        "nameFirst": {
+          "name": "nameFirst",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "prim",
+                "obj": "_"
+              },
+              {
+                "type": "app",
+                "rule": "letter"
+              }
+            ]
+          }
+        },
+        "nameRest": {
+          "name": "nameRest",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "prim",
+                "obj": "_"
+              },
+              {
+                "type": "app",
+                "rule": "alnum"
+              }
+            ]
+          }
+        },
+        "ident": {
+          "name": "ident",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "not",
+                "expr": {
+                  "type": "app",
+                  "rule": "keyword"
+                }
+              },
+              {
+                "type": "app",
+                "rule": "name"
+              }
+            ]
+          },
+          "description": "an identifier"
+        },
+        "keyword_null": {
+          "name": "keyword_null",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "null"
+              },
+              {
+                "type": "not",
+                "expr": {
+                  "type": "app",
+                  "rule": "nameRest"
+                }
+              }
+            ]
+          }
+        },
+        "keyword_true": {
+          "name": "keyword_true",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "true"
+              },
+              {
+                "type": "not",
+                "expr": {
+                  "type": "app",
+                  "rule": "nameRest"
+                }
+              }
+            ]
+          }
+        },
+        "keyword_false": {
+          "name": "keyword_false",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "false"
+              },
+              {
+                "type": "not",
+                "expr": {
+                  "type": "app",
+                  "rule": "nameRest"
+                }
+              }
+            ]
+          }
+        },
+        "keyword": {
+          "name": "keyword",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "app",
+                "rule": "keyword_null"
+              },
+              {
+                "type": "app",
+                "rule": "keyword_true"
+              },
+              {
+                "type": "app",
+                "rule": "keyword_false"
+              }
+            ]
+          }
+        },
+        "string": {
+          "name": "string",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "\""
+              },
+              {
+                "type": "star",
+                "expr": {
+                  "type": "app",
+                  "rule": "strChar"
+                }
+              },
+              {
+                "type": "prim",
+                "obj": "\""
+              }
+            ]
+          }
+        },
+        "strChar": {
+          "name": "strChar",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "app",
+                "rule": "escapeChar"
+              },
+              {
+                "type": "seq",
+                "factors": [
+                  {
+                    "type": "not",
+                    "expr": {
+                      "type": "prim",
+                      "obj": "\\"
+                    }
+                  },
+                  {
+                    "type": "not",
+                    "expr": {
+                      "type": "prim",
+                      "obj": "\""
+                    }
+                  },
+                  {
+                    "type": "not",
+                    "expr": {
+                      "type": "prim",
+                      "obj": "\n"
+                    }
+                  },
+                  {
+                    "type": "app",
+                    "rule": "any"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "escapeChar_backslash": {
+          "name": "escapeChar_backslash",
+          "formals": [],
+          "body": {
+            "type": "prim",
+            "obj": "\\\\"
+          }
+        },
+        "escapeChar_doubleQuote": {
+          "name": "escapeChar_doubleQuote",
+          "formals": [],
+          "body": {
+            "type": "prim",
+            "obj": "\\\""
+          }
+        },
+        "escapeChar_singleQuote": {
+          "name": "escapeChar_singleQuote",
+          "formals": [],
+          "body": {
+            "type": "prim",
+            "obj": "\\'"
+          }
+        },
+        "escapeChar_backspace": {
+          "name": "escapeChar_backspace",
+          "formals": [],
+          "body": {
+            "type": "prim",
+            "obj": "\\b"
+          }
+        },
+        "escapeChar_lineFeed": {
+          "name": "escapeChar_lineFeed",
+          "formals": [],
+          "body": {
+            "type": "prim",
+            "obj": "\\n"
+          }
+        },
+        "escapeChar_carriageReturn": {
+          "name": "escapeChar_carriageReturn",
+          "formals": [],
+          "body": {
+            "type": "prim",
+            "obj": "\\r"
+          }
+        },
+        "escapeChar_tab": {
+          "name": "escapeChar_tab",
+          "formals": [],
+          "body": {
+            "type": "prim",
+            "obj": "\\t"
+          }
+        },
+        "escapeChar_unicodeEscape": {
+          "name": "escapeChar_unicodeEscape",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "\\u"
+              },
+              {
+                "type": "app",
+                "rule": "hexDigit"
+              },
+              {
+                "type": "app",
+                "rule": "hexDigit"
+              },
+              {
+                "type": "app",
+                "rule": "hexDigit"
+              },
+              {
+                "type": "app",
+                "rule": "hexDigit"
+              }
+            ]
+          }
+        },
+        "escapeChar_hexEscape": {
+          "name": "escapeChar_hexEscape",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "\\x"
+              },
+              {
+                "type": "app",
+                "rule": "hexDigit"
+              },
+              {
+                "type": "app",
+                "rule": "hexDigit"
+              }
+            ]
+          }
+        },
+        "escapeChar": {
+          "name": "escapeChar",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "app",
+                "rule": "escapeChar_backslash"
+              },
+              {
+                "type": "app",
+                "rule": "escapeChar_doubleQuote"
+              },
+              {
+                "type": "app",
+                "rule": "escapeChar_singleQuote"
+              },
+              {
+                "type": "app",
+                "rule": "escapeChar_backspace"
+              },
+              {
+                "type": "app",
+                "rule": "escapeChar_lineFeed"
+              },
+              {
+                "type": "app",
+                "rule": "escapeChar_carriageReturn"
+              },
+              {
+                "type": "app",
+                "rule": "escapeChar_tab"
+              },
+              {
+                "type": "app",
+                "rule": "escapeChar_unicodeEscape"
+              },
+              {
+                "type": "app",
+                "rule": "escapeChar_hexEscape"
+              }
+            ]
+          },
+          "description": "an escape sequence"
+        },
+        "number": {
+          "name": "number",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "opt",
+                "expr": {
+                  "type": "prim",
+                  "obj": "-"
+                }
+              },
+              {
+                "type": "plus",
+                "expr": {
+                  "type": "app",
+                  "rule": "digit"
+                }
+              }
+            ]
+          },
+          "description": "a number"
+        },
+        "comment_singleLine": {
+          "name": "comment_singleLine",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "//"
+              },
+              {
+                "type": "star",
+                "expr": {
+                  "type": "seq",
+                  "factors": [
+                    {
+                      "type": "not",
+                      "expr": {
+                        "type": "prim",
+                        "obj": "\n"
+                      }
+                    },
+                    {
+                      "type": "app",
+                      "rule": "any"
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "prim",
+                "obj": "\n"
+              }
+            ]
+          }
+        },
+        "comment_multiLine": {
+          "name": "comment_multiLine",
+          "formals": [],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "prim",
+                "obj": "/*"
+              },
+              {
+                "type": "star",
+                "expr": {
+                  "type": "seq",
+                  "factors": [
+                    {
+                      "type": "not",
+                      "expr": {
+                        "type": "prim",
+                        "obj": "*/"
+                      }
+                    },
+                    {
+                      "type": "app",
+                      "rule": "any"
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "prim",
+                "obj": "*/"
+              }
+            ]
+          }
+        },
+        "comment": {
+          "name": "comment",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "app",
+                "rule": "comment_singleLine"
+              },
+              {
+                "type": "app",
+                "rule": "comment_multiLine"
+              }
+            ]
+          }
+        },
+        "tokens": {
+          "name": "tokens",
+          "formals": [],
+          "body": {
+            "type": "star",
+            "expr": {
+              "type": "app",
+              "rule": "token"
+            }
+          }
+        },
+        "token": {
+          "name": "token",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "app",
+                "rule": "caseName"
+              },
+              {
+                "type": "app",
+                "rule": "comment"
+              },
+              {
+                "type": "app",
+                "rule": "ident"
+              },
+              {
+                "type": "app",
+                "rule": "keyword"
+              },
+              {
+                "type": "app",
+                "rule": "number"
+              },
+              {
+                "type": "app",
+                "rule": "operator"
+              },
+              {
+                "type": "app",
+                "rule": "punctuation"
+              },
+              {
+                "type": "app",
+                "rule": "string"
+              },
+              {
+                "type": "app",
+                "rule": "any"
+              }
+            ]
+          }
+        },
+        "operator": {
+          "name": "operator",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "prim",
+                "obj": "<:"
+              },
+              {
+                "type": "prim",
+                "obj": "="
+              },
+              {
+                "type": "prim",
+                "obj": ":="
+              },
+              {
+                "type": "prim",
+                "obj": "+="
+              },
+              {
+                "type": "prim",
+                "obj": "*"
+              },
+              {
+                "type": "prim",
+                "obj": "+"
+              },
+              {
+                "type": "prim",
+                "obj": "?"
+              },
+              {
+                "type": "prim",
+                "obj": "~"
+              },
+              {
+                "type": "prim",
+                "obj": "&"
+              }
+            ]
+          }
+        },
+        "punctuation": {
+          "name": "punctuation",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "prim",
+                "obj": "<"
+              },
+              {
+                "type": "prim",
+                "obj": ">"
+              },
+              {
+                "type": "prim",
+                "obj": ","
+              },
+              {
+                "type": "prim",
+                "obj": "--"
+              }
+            ]
+          }
+        }
+      },
+      "extensions": {
+        "space": {
+          "name": "space",
+          "formals": [],
+          "body": {
+            "type": "app",
+            "rule": "comment"
+          }
+        }
+      },
+      "overrides": {}
+    },
+    "BuiltInRules": {
+      "name": "BuiltInRules",
+      "superGrammar": "ProtoBuiltInRules",
+      "definitions": {
+        "alnum": {
+          "name": "alnum",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "app",
+                "rule": "letter"
+              },
+              {
+                "type": "app",
+                "rule": "digit"
+              }
+            ]
+          },
+          "description": "an alpha-numeric character"
+        },
+        "letter": {
+          "name": "letter",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "app",
+                "rule": "lower"
+              },
+              {
+                "type": "app",
+                "rule": "upper"
+              },
+              {
+                "type": "app",
+                "rule": "unicodeLtmo"
+              }
+            ]
+          },
+          "description": "a letter"
+        },
+        "digit": {
+          "name": "digit",
+          "formals": [],
+          "body": {
+            "type": "range",
+            "from": "0",
+            "to": "9"
+          },
+          "description": "a digit"
+        },
+        "hexDigit": {
+          "name": "hexDigit",
+          "formals": [],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "app",
+                "rule": "digit"
+              },
+              {
+                "type": "range",
+                "from": "a",
+                "to": "f"
+              },
+              {
+                "type": "range",
+                "from": "A",
+                "to": "F"
+              }
+            ]
+          },
+          "description": "a hexadecimal digit"
+        },
+        "ListOf": {
+          "name": "ListOf",
+          "formals": [
+            "elem",
+            "sep"
+          ],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "app",
+                "rule": "NonemptyListOf",
+                "args": [
+                  {
+                    "type": "param",
+                    "index": 0
+                  },
+                  {
+                    "type": "param",
+                    "index": 1
+                  }
+                ]
+              },
+              {
+                "type": "app",
+                "rule": "EmptyListOf",
+                "args": [
+                  {
+                    "type": "param",
+                    "index": 0
+                  },
+                  {
+                    "type": "param",
+                    "index": 1
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "NonemptyListOf": {
+          "name": "NonemptyListOf",
+          "formals": [
+            "elem",
+            "sep"
+          ],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "param",
+                "index": 0
+              },
+              {
+                "type": "star",
+                "expr": {
+                  "type": "seq",
+                  "factors": [
+                    {
+                      "type": "param",
+                      "index": 1
+                    },
+                    {
+                      "type": "param",
+                      "index": 0
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "EmptyListOf": {
+          "name": "EmptyListOf",
+          "formals": [
+            "elem",
+            "sep"
+          ],
+          "body": {
+            "type": "seq",
+            "factors": []
+          }
+        },
+        "listOf": {
+          "name": "listOf",
+          "formals": [
+            "elem",
+            "sep"
+          ],
+          "body": {
+            "type": "alt",
+            "terms": [
+              {
+                "type": "app",
+                "rule": "nonemptyListOf",
+                "args": [
+                  {
+                    "type": "param",
+                    "index": 0
+                  },
+                  {
+                    "type": "param",
+                    "index": 1
+                  }
+                ]
+              },
+              {
+                "type": "app",
+                "rule": "emptyListOf",
+                "args": [
+                  {
+                    "type": "param",
+                    "index": 0
+                  },
+                  {
+                    "type": "param",
+                    "index": 1
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "nonemptyListOf": {
+          "name": "nonemptyListOf",
+          "formals": [
+            "elem",
+            "sep"
+          ],
+          "body": {
+            "type": "seq",
+            "factors": [
+              {
+                "type": "param",
+                "index": 0
+              },
+              {
+                "type": "star",
+                "expr": {
+                  "type": "seq",
+                  "factors": [
+                    {
+                      "type": "param",
+                      "index": 1
+                    },
+                    {
+                      "type": "param",
+                      "index": 0
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "emptyListOf": {
+          "name": "emptyListOf",
+          "formals": [
+            "elem",
+            "sep"
+          ],
+          "body": {
+            "type": "seq",
+            "factors": []
+          }
+        }
+      },
+      "extensions": {},
+      "overrides": {}
+    },
+    "ProtoBuiltInRules": {
+      "name": "ProtoBuiltInRules",
+      "definitions": {
+        "any": {
+          "name": "any",
+          "formals": [],
+          "body": {
+            "type": "any"
+          },
+          "description": "any object"
+        },
+        "end": {
+          "name": "end",
+          "formals": [],
+          "body": {
+            "type": "end"
+          },
+          "description": "end of input"
+        },
+        "lower": {
+          "name": "lower",
+          "formals": [],
+          "body": {
+            "type": "unicodeChar",
+            "category": "Ll"
+          },
+          "description": "a lowercase letter"
+        },
+        "spaces": {
+          "name": "spaces",
+          "formals": [],
+          "body": {
+            "type": "star",
+            "expr": {
+              "type": "app",
+              "rule": "space"
+            }
+          }
+        },
+        "space": {
+          "name": "space",
+          "formals": [],
+          "body": {
+            "type": "range",
+            "from": "\u0000",
+            "to": " "
+          },
+          "description": "a space"
+        },
+        "unicodeLtmo": {
+          "name": "unicodeLtmo",
+          "formals": [],
+          "body": {
+            "type": "unicodeChar",
+            "category": "Ltmo"
+          }
+        },
+        "upper": {
+          "name": "upper",
+          "formals": [],
+          "body": {
+            "type": "unicodeChar",
+            "category": "Lu"
+          },
+          "description": "an uppercase letter"
+        },
+        "Boolean": {
+          "name": "Boolean",
+          "formals": [],
+          "body": {
+            "type": "typeCheck",
+            "expectedType": "boolean"
+          }
+        },
+        "Number": {
+          "name": "Number",
+          "formals": [],
+          "body": {
+            "type": "typeCheck",
+            "expectedType": "number"
+          }
+        },
+        "String": {
+          "name": "String",
+          "formals": [],
+          "body": {
+            "type": "typeCheck",
+            "expectedType": "string"
+          }
+        }
+      },
+      "extensions": {},
+      "overrides": {}
+    }
+  }
+}
