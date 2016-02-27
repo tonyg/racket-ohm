@@ -66,7 +66,8 @@
       [(hash-table ['type "arr"] ['expr expr] _ ...) (pexpr-val (walk expr))]
       [(hash-table ['type "val"] ['expr expr] _ ...) (pexpr-arr (walk expr))]
       [(hash-table ['type "obj"] ['lenient lenient?] ['properties properties] _ ...)
-       (pexpr-obj lenient? (hash-map-values properties walk))]
+       (pexpr-obj lenient? (map (lambda (p) (cons (hash-ref p 'name)
+                                                  (walk (hash-ref p 'pattern)))) properties))]
       [(hash-table ['type "app"] ['rule rule-name] _ ...)
        (pexpr-apply (string->symbol rule-name)
                     (map walk (hash-ref j 'args '())))]
