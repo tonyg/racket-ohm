@@ -9,10 +9,10 @@
 (require "grammar.rkt")
 (require "pexpr.rkt")
 
-(define (maybe-symbol s)
+(define (maybe f s)
   (if (eq? s 'null)
       #f
-      (string->symbol s)))
+      (f s)))
 
 (define (jsexpr->grammar j)
   (match j
@@ -25,17 +25,18 @@
      (define parsed-rules (for/list [((name j) (in-hash rules))] (jsexpr->rule name j)))
      (define (rules-of-kind k) (for/list [(e parsed-rules) #:when (equal? (car e) k)] (cadr e)))
      (ohm-grammar (string->symbol name)
-                  (maybe-symbol super-grammar-name)
-                  (maybe-symbol start-rule)
+                  (maybe string->symbol super-grammar-name)
+                  (maybe string->symbol start-rule)
                   (rules-of-kind "define")
                   (rules-of-kind "extend")
                   (rules-of-kind "override"))]))
 
 (define (jsexpr->rule name j)
   (match j
-    [(list kind _meta-info _description formals rule-body)
+    [(list kind _meta-info description formals rule-body)
      (list kind
            (ohm-rule name
+                     (maybe values description)
                      (map string->symbol formals)
                      (jsexpr->pexpr rule-body)))]))
 

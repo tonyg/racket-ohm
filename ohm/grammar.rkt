@@ -17,6 +17,7 @@
 
 (struct ohm-rule
   (name
+   description
    formals
    body)
   #:transparent)
