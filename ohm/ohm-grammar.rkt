@@ -1,7 +1,10 @@
 #lang racket/base
 ;; The grammar for Ohm grammars themselves.
 
-(provide load-ohm-grammar)
+(provide proto-built-in-rules
+         built-in-rules
+         ohm-grammar
+         system-grammars)
 
 (require json)
 (require racket/file)
@@ -10,7 +13,18 @@
 (require racket/runtime-path)
 (define-runtime-path ohm ".")
 
-(define (load-ohm-grammar)
-  (define ohm-grammar-json
-    (with-input-from-file (build-path ohm "ohm-grammar.json") read-json))
-  (jsexpr->grammar-hierarchy ohm-grammar-json))
+(define (load-system-grammar json-filename)
+  (jsexpr->grammar (with-input-from-file (build-path ohm json-filename) read-json)))
+
+(define proto-built-in-rules (load-system-grammar "proto-built-in-rules.json"))
+(define built-in-rules (load-system-grammar "built-in-rules.json"))
+(define ohm-grammar (load-system-grammar "ohm-grammar.json"))
+
+(define system-grammars
+  (hash 'ProtoBuiltInRules proto-built-in-rules
+        'BuiltInRules built-in-rules
+        'Ohm ohm-grammar))
+
+(module+ test
+  (require racket/pretty)
+  (pretty-print system-grammars))

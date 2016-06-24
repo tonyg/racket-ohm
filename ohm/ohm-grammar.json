@@ -1,1894 +1,2868 @@
-{
-  "startGrammar": "Ohm",
-  "grammars": {
-    "Ohm": {
-      "name": "Ohm",
-      "superGrammar": "BuiltInRules",
-      "defaultStartRule": "Grammars",
-      "definitions": {
-        "Grammars": {
-          "name": "Grammars",
-          "formals": [],
-          "body": {
-            "type": "star",
-            "expr": {
-              "type": "app",
-              "rule": "Grammar"
-            }
-          }
-        },
-        "Grammar": {
-          "name": "Grammar",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "app",
-                "rule": "ident"
-              },
-              {
-                "type": "opt",
-                "expr": {
-                  "type": "app",
-                  "rule": "SuperGrammar"
-                }
-              },
-              {
-                "type": "prim",
-                "obj": "{"
-              },
-              {
-                "type": "star",
-                "expr": {
-                  "type": "app",
-                  "rule": "Rule"
-                }
-              },
-              {
-                "type": "prim",
-                "obj": "}"
-              }
-            ]
-          }
-        },
-        "SuperGrammar": {
-          "name": "SuperGrammar",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "<:"
-              },
-              {
-                "type": "app",
-                "rule": "ident"
-              }
-            ]
-          }
-        },
-        "Rule_define": {
-          "name": "Rule_define",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "app",
-                "rule": "ident"
-              },
-              {
-                "type": "opt",
-                "expr": {
-                  "type": "app",
-                  "rule": "Formals"
-                }
-              },
-              {
-                "type": "opt",
-                "expr": {
-                  "type": "app",
-                  "rule": "ruleDescr"
-                }
-              },
-              {
-                "type": "prim",
-                "obj": "="
-              },
-              {
-                "type": "app",
-                "rule": "Alt"
-              }
-            ]
-          }
-        },
-        "Rule_override": {
-          "name": "Rule_override",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "app",
-                "rule": "ident"
-              },
-              {
-                "type": "opt",
-                "expr": {
-                  "type": "app",
-                  "rule": "Formals"
-                }
-              },
-              {
-                "type": "prim",
-                "obj": ":="
-              },
-              {
-                "type": "app",
-                "rule": "Alt"
-              }
-            ]
-          }
-        },
-        "Rule_extend": {
-          "name": "Rule_extend",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "app",
-                "rule": "ident"
-              },
-              {
-                "type": "opt",
-                "expr": {
-                  "type": "app",
-                  "rule": "Formals"
-                }
-              },
-              {
-                "type": "prim",
-                "obj": "+="
-              },
-              {
-                "type": "app",
-                "rule": "Alt"
-              }
-            ]
-          }
-        },
-        "Rule": {
-          "name": "Rule",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "app",
-                "rule": "Rule_define"
-              },
-              {
-                "type": "app",
-                "rule": "Rule_override"
-              },
-              {
-                "type": "app",
-                "rule": "Rule_extend"
-              }
-            ]
-          }
-        },
-        "Formals": {
-          "name": "Formals",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "<"
-              },
-              {
-                "type": "app",
-                "rule": "ListOf",
-                "args": [
-                  {
-                    "type": "app",
-                    "rule": "ident"
-                  },
-                  {
-                    "type": "prim",
-                    "obj": ","
-                  }
-                ]
-              },
-              {
-                "type": "prim",
-                "obj": ">"
-              }
-            ]
-          }
-        },
-        "Params": {
-          "name": "Params",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "<"
-              },
-              {
-                "type": "app",
-                "rule": "ListOf",
-                "args": [
-                  {
-                    "type": "app",
-                    "rule": "Seq"
-                  },
-                  {
-                    "type": "prim",
-                    "obj": ","
-                  }
-                ]
-              },
-              {
-                "type": "prim",
-                "obj": ">"
-              }
-            ]
-          }
-        },
-        "Alt": {
-          "name": "Alt",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "app",
-                "rule": "Term"
-              },
-              {
-                "type": "star",
-                "expr": {
-                  "type": "seq",
-                  "factors": [
-                    {
-                      "type": "prim",
-                      "obj": "|"
-                    },
-                    {
-                      "type": "app",
-                      "rule": "Term"
-                    }
+[
+   "grammar",
+   {
+      "source" : "Ohm {\n\n  Grammars\n    = Grammar*\n\n  Grammar\n    = ident SuperGrammar? \"{\" Rule* \"}\"\n\n  SuperGrammar\n    = \"<:\" ident\n\n  Rule\n    = ident Formals? ruleDescr? \"=\"  RuleBody  -- define\n    | ident Formals?            \":=\" RuleBody  -- override\n    | ident Formals?            \"+=\" RuleBody  -- extend\n\n  RuleBody\n    = \"|\"? TopLevelTerm (\"|\" TopLevelTerm)*\n\n  TopLevelTerm\n    = Seq caseName  -- inline\n    | Seq\n\n  Formals\n    = \"<\" ListOf<ident, \",\"> \">\"\n\n  Params\n    = \"<\" ListOf<Seq, \",\"> \">\"\n\n  Alt\n    = Seq (\"|\" Seq)*\n\n  Seq\n    = Iter*\n\n  Iter\n    = Pred \"*\"  -- star\n    | Pred \"+\"  -- plus\n    | Pred \"?\"  -- opt\n    | Pred\n\n  Pred\n    = \"~\" Lex  -- not\n    | \"&\" Lex  -- lookahead\n    | Lex\n\n  Lex\n    = \"#\" Base  -- lex\n    | Base\n\n  Base\n    = ident Params? ~(ruleDescr? \"=\" | \":=\" | \"+=\")  -- application\n    | terminal \"..\" terminal                         -- range\n    | terminal                                       -- terminal\n    | \"(\" Alt \")\"                                    -- paren\n\n  ruleDescr  (a rule description)\n    = \"(\" ruleDescrText \")\"\n\n  ruleDescrText\n    = (~\")\" any)*\n\n  caseName\n    = \"--\" (~\"\\n\" space)* name (~\"\\n\" space)* (\"\\n\" | &\"}\")\n\n  name  (a name)\n    = nameFirst nameRest*\n\n  nameFirst\n    = \"_\"\n    | letter\n\n  nameRest\n    = \"_\"\n    | alnum\n\n  ident  (an identifier)\n    = name\n\n  terminal\n    = \"\\\"\" terminalChar* \"\\\"\"\n\n  terminalChar\n    = escapeChar\n    | ~\"\\\\\" ~\"\\\"\" ~\"\\n\" any\n\n  escapeChar  (an escape sequence)\n    = \"\\\\\\\\\"                                     -- backslash\n    | \"\\\\\\\"\"                                     -- doubleQuote\n    | \"\\\\\\'\"                                     -- singleQuote\n    | \"\\\\b\"                                      -- backspace\n    | \"\\\\n\"                                      -- lineFeed\n    | \"\\\\r\"                                      -- carriageReturn\n    | \"\\\\t\"                                      -- tab\n    | \"\\\\u\" hexDigit hexDigit hexDigit hexDigit  -- unicodeEscape\n    | \"\\\\x\" hexDigit hexDigit                    -- hexEscape\n\n  space\n   += comment\n\n  comment\n    = \"//\" (~\"\\n\" any)* \"\\n\"  -- singleLine\n    | \"/*\" (~\"*/\" any)* \"*/\"  -- multiLine\n\n  tokens = token*\n\n  token = caseName | comment | ident | operator | punctuation | terminal | any\n\n  operator = \"<:\" | \"=\" | \":=\" | \"+=\" | \"*\" | \"+\" | \"?\" | \"~\" | \"&\"\n\n  punctuation = \"<\" | \">\" | \",\" | \"--\"\n}"
+   },
+   "Ohm",
+   null,
+   "Grammars",
+   {
+      "escapeChar_lineFeed" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "terminal",
+            {
+               "sourceInterval" : [
+                  1724,
+                  1729
+               ]
+            },
+            "\\n"
+         ]
+      ],
+      "name" : [
+         "define",
+         {},
+         "a name",
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  1200,
+                  1219
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1200,
+                     1209
                   ]
-                }
-              }
+               },
+               "nameFirst",
+               []
+            ],
+            [
+               "star",
+               {
+                  "sourceInterval" : [
+                     1210,
+                     1219
+                  ]
+               },
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        1210,
+                        1218
+                     ]
+                  },
+                  "nameRest",
+                  []
+               ]
             ]
-          }
-        },
-        "Term_inline": {
-          "name": "Term_inline",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "app",
-                "rule": "Seq"
-              },
-              {
-                "type": "app",
-                "rule": "caseName"
-              }
+         ]
+      ],
+      "Base_terminal" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "app",
+            {
+               "sourceInterval" : [
+                  885,
+                  893
+               ]
+            },
+            "terminal",
+            []
+         ]
+      ],
+      "Grammar" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  50,
+                  83
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     50,
+                     55
+                  ]
+               },
+               "ident",
+               []
+            ],
+            [
+               "opt",
+               {
+                  "sourceInterval" : [
+                     56,
+                     69
+                  ]
+               },
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        56,
+                        68
+                     ]
+                  },
+                  "SuperGrammar",
+                  []
+               ]
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     70,
+                     73
+                  ]
+               },
+               "{"
+            ],
+            [
+               "star",
+               {
+                  "sourceInterval" : [
+                     74,
+                     79
+                  ]
+               },
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        74,
+                        78
+                     ]
+                  },
+                  "Rule",
+                  []
+               ]
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     80,
+                     83
+                  ]
+               },
+               "}"
             ]
-          }
-        },
-        "Term": {
-          "name": "Term",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "app",
-                "rule": "Term_inline"
-              },
-              {
-                "type": "app",
-                "rule": "Seq"
-              }
+         ]
+      ],
+      "operator" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  2264,
+                  2318
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2264,
+                     2268
+                  ]
+               },
+               "<:"
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2271,
+                     2274
+                  ]
+               },
+               "="
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2277,
+                     2281
+                  ]
+               },
+               ":="
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2284,
+                     2288
+                  ]
+               },
+               "+="
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2291,
+                     2294
+                  ]
+               },
+               "*"
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2297,
+                     2300
+                  ]
+               },
+               "+"
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2303,
+                     2306
+                  ]
+               },
+               "?"
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2309,
+                     2312
+                  ]
+               },
+               "~"
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2315,
+                     2318
+                  ]
+               },
+               "&"
             ]
-          }
-        },
-        "Seq": {
-          "name": "Seq",
-          "formals": [],
-          "body": {
-            "type": "star",
-            "expr": {
-              "type": "app",
-              "rule": "Iter"
-            }
-          }
-        },
-        "Iter_star": {
-          "name": "Iter_star",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "app",
-                "rule": "Pred"
-              },
-              {
-                "type": "prim",
-                "obj": "*"
-              }
+         ]
+      ],
+      "Base_range" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  823,
+                  845
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     823,
+                     831
+                  ]
+               },
+               "terminal",
+               []
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     832,
+                     836
+                  ]
+               },
+               ".."
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     837,
+                     845
+                  ]
+               },
+               "terminal",
+               []
             ]
-          }
-        },
-        "Iter_plus": {
-          "name": "Iter_plus",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "app",
-                "rule": "Pred"
-              },
-              {
-                "type": "prim",
-                "obj": "+"
-              }
+         ]
+      ],
+      "Iter_star" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  556,
+                  564
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     556,
+                     560
+                  ]
+               },
+               "Pred",
+               []
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     561,
+                     564
+                  ]
+               },
+               "*"
             ]
-          }
-        },
-        "Iter_opt": {
-          "name": "Iter_opt",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "app",
-                "rule": "Pred"
-              },
-              {
-                "type": "prim",
-                "obj": "?"
-              }
-            ]
-          }
-        },
-        "Iter": {
-          "name": "Iter",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "app",
-                "rule": "Iter_star"
-              },
-              {
-                "type": "app",
-                "rule": "Iter_plus"
-              },
-              {
-                "type": "app",
-                "rule": "Iter_opt"
-              },
-              {
-                "type": "app",
-                "rule": "Pred"
-              }
-            ]
-          }
-        },
-        "Pred_not": {
-          "name": "Pred_not",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "~"
-              },
-              {
-                "type": "app",
-                "rule": "Modifier"
-              }
-            ]
-          }
-        },
-        "Pred_lookahead": {
-          "name": "Pred_lookahead",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "&"
-              },
-              {
-                "type": "app",
-                "rule": "Modifier"
-              }
-            ]
-          }
-        },
-        "Pred": {
-          "name": "Pred",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "app",
-                "rule": "Pred_not"
-              },
-              {
-                "type": "app",
-                "rule": "Pred_lookahead"
-              },
-              {
-                "type": "app",
-                "rule": "Modifier"
-              }
-            ]
-          }
-        },
-        "Modifier_lex": {
-          "name": "Modifier_lex",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "#"
-              },
-              {
-                "type": "app",
-                "rule": "Base"
-              }
-            ]
-          }
-        },
-        "Modifier_val": {
-          "name": "Modifier_val",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "$"
-              },
-              {
-                "type": "app",
-                "rule": "Base"
-              }
-            ]
-          }
-        },
-        "Modifier": {
-          "name": "Modifier",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "app",
-                "rule": "Modifier_lex"
-              },
-              {
-                "type": "app",
-                "rule": "Modifier_val"
-              },
-              {
-                "type": "app",
-                "rule": "Base"
-              }
-            ]
-          }
-        },
-        "Base_application": {
-          "name": "Base_application",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "app",
-                "rule": "ident"
-              },
-              {
-                "type": "opt",
-                "expr": {
-                  "type": "app",
-                  "rule": "Params"
-                }
-              },
-              {
-                "type": "not",
-                "expr": {
-                  "type": "alt",
-                  "terms": [
-                    {
-                      "type": "seq",
-                      "factors": [
+         ]
+      ],
+      "Base_application" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  755,
+                  800
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     755,
+                     760
+                  ]
+               },
+               "ident",
+               []
+            ],
+            [
+               "opt",
+               {
+                  "sourceInterval" : [
+                     761,
+                     768
+                  ]
+               },
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        761,
+                        767
+                     ]
+                  },
+                  "Params",
+                  []
+               ]
+            ],
+            [
+               "not",
+               {
+                  "sourceInterval" : [
+                     769,
+                     800
+                  ]
+               },
+               [
+                  "alt",
+                  {
+                     "sourceInterval" : [
+                        771,
+                        799
+                     ]
+                  },
+                  [
+                     "seq",
+                     {
+                        "sourceInterval" : [
+                           771,
+                           785
+                        ]
+                     },
+                     [
+                        "opt",
                         {
-                          "type": "opt",
-                          "expr": {
-                            "type": "app",
-                            "rule": "ruleDescr"
-                          }
+                           "sourceInterval" : [
+                              771,
+                              781
+                           ]
                         },
+                        [
+                           "app",
+                           {
+                              "sourceInterval" : [
+                                 771,
+                                 780
+                              ]
+                           },
+                           "ruleDescr",
+                           []
+                        ]
+                     ],
+                     [
+                        "terminal",
                         {
-                          "type": "prim",
-                          "obj": "="
-                        }
-                      ]
-                    },
-                    {
-                      "type": "prim",
-                      "obj": ":="
-                    },
-                    {
-                      "type": "prim",
-                      "obj": "+="
-                    }
+                           "sourceInterval" : [
+                              782,
+                              785
+                           ]
+                        },
+                        "="
+                     ]
+                  ],
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           788,
+                           792
+                        ]
+                     },
+                     ":="
+                  ],
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           795,
+                           799
+                        ]
+                     },
+                     "+="
                   ]
-                }
-              }
+               ]
             ]
-          }
-        },
-        "Base_range": {
-          "name": "Base_range",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "app",
-                "rule": "Prim"
-              },
-              {
-                "type": "prim",
-                "obj": ".."
-              },
-              {
-                "type": "app",
-                "rule": "Prim"
-              }
-            ]
-          }
-        },
-        "Base_prim": {
-          "name": "Base_prim",
-          "formals": [],
-          "body": {
-            "type": "app",
-            "rule": "Prim"
-          }
-        },
-        "Base_paren": {
-          "name": "Base_paren",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "("
-              },
-              {
-                "type": "app",
-                "rule": "Alt"
-              },
-              {
-                "type": "prim",
-                "obj": ")"
-              }
-            ]
-          }
-        },
-        "Base_arr": {
-          "name": "Base_arr",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "["
-              },
-              {
-                "type": "app",
-                "rule": "Alt"
-              },
-              {
-                "type": "prim",
-                "obj": "]"
-              }
-            ]
-          }
-        },
-        "Base_obj": {
-          "name": "Base_obj",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "{"
-              },
-              {
-                "type": "opt",
-                "expr": {
-                  "type": "prim",
-                  "obj": "..."
-                }
-              },
-              {
-                "type": "prim",
-                "obj": "}"
-              }
-            ]
-          }
-        },
-        "Base_objWithProps": {
-          "name": "Base_objWithProps",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "{"
-              },
-              {
-                "type": "app",
-                "rule": "Props"
-              },
-              {
-                "type": "opt",
-                "expr": {
-                  "type": "seq",
-                  "factors": [
-                    {
-                      "type": "prim",
-                      "obj": ","
-                    },
-                    {
-                      "type": "prim",
-                      "obj": "..."
-                    }
+         ]
+      ],
+      "Params" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  470,
+                  494
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     470,
+                     473
                   ]
-                }
-              },
-              {
-                "type": "prim",
-                "obj": "}"
-              }
-            ]
-          }
-        },
-        "Base": {
-          "name": "Base",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "app",
-                "rule": "Base_application"
-              },
-              {
-                "type": "app",
-                "rule": "Base_range"
-              },
-              {
-                "type": "app",
-                "rule": "Base_prim"
-              },
-              {
-                "type": "app",
-                "rule": "Base_paren"
-              },
-              {
-                "type": "app",
-                "rule": "Base_arr"
-              },
-              {
-                "type": "app",
-                "rule": "Base_obj"
-              },
-              {
-                "type": "app",
-                "rule": "Base_objWithProps"
-              }
-            ]
-          }
-        },
-        "Prim": {
-          "name": "Prim",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "app",
-                "rule": "keyword"
-              },
-              {
-                "type": "app",
-                "rule": "string"
-              },
-              {
-                "type": "app",
-                "rule": "number"
-              }
-            ]
-          }
-        },
-        "Props": {
-          "name": "Props",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "app",
-                "rule": "Prop"
-              },
-              {
-                "type": "star",
-                "expr": {
-                  "type": "seq",
-                  "factors": [
-                    {
-                      "type": "prim",
-                      "obj": ","
-                    },
-                    {
-                      "type": "app",
-                      "rule": "Prop"
-                    }
+               },
+               "<"
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     474,
+                     490
                   ]
-                }
-              }
-            ]
-          }
-        },
-        "Prop": {
-          "name": "Prop",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "alt",
-                "terms": [
-                  {
-                    "type": "app",
-                    "rule": "name"
-                  },
-                  {
-                    "type": "app",
-                    "rule": "string"
-                  }
-                ]
-              },
-              {
-                "type": "prim",
-                "obj": ":"
-              },
-              {
-                "type": "app",
-                "rule": "Alt"
-              }
-            ]
-          }
-        },
-        "ruleDescr": {
-          "name": "ruleDescr",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "("
-              },
-              {
-                "type": "app",
-                "rule": "ruleDescrText"
-              },
-              {
-                "type": "prim",
-                "obj": ")"
-              }
-            ]
-          },
-          "description": "a rule description"
-        },
-        "ruleDescrText": {
-          "name": "ruleDescrText",
-          "formals": [],
-          "body": {
-            "type": "star",
-            "expr": {
-              "type": "seq",
-              "factors": [
-                {
-                  "type": "not",
-                  "expr": {
-                    "type": "prim",
-                    "obj": ")"
-                  }
-                },
-                {
-                  "type": "app",
-                  "rule": "any"
-                }
-              ]
-            }
-          }
-        },
-        "caseName": {
-          "name": "caseName",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "--"
-              },
-              {
-                "type": "star",
-                "expr": {
-                  "type": "seq",
-                  "factors": [
-                    {
-                      "type": "not",
-                      "expr": {
-                        "type": "prim",
-                        "obj": "\n"
-                      }
-                    },
-                    {
-                      "type": "app",
-                      "rule": "space"
-                    }
+               },
+               "ListOf",
+               [
+                  [
+                     "app",
+                     {
+                        "sourceInterval" : [
+                           481,
+                           484
+                        ]
+                     },
+                     "Seq",
+                     []
+                  ],
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           486,
+                           489
+                        ]
+                     },
+                     ","
                   ]
-                }
-              },
-              {
-                "type": "app",
-                "rule": "name"
-              },
-              {
-                "type": "star",
-                "expr": {
-                  "type": "seq",
-                  "factors": [
-                    {
-                      "type": "not",
-                      "expr": {
-                        "type": "prim",
-                        "obj": "\n"
-                      }
-                    },
-                    {
-                      "type": "app",
-                      "rule": "space"
-                    }
+               ]
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     491,
+                     494
                   ]
-                }
-              },
-              {
-                "type": "alt",
-                "terms": [
-                  {
-                    "type": "prim",
-                    "obj": "\n"
-                  },
-                  {
-                    "type": "lookahead",
-                    "expr": {
-                      "type": "prim",
-                      "obj": "}"
-                    }
-                  }
-                ]
-              }
+               },
+               ">"
             ]
-          }
-        },
-        "name": {
-          "name": "name",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "app",
-                "rule": "nameFirst"
-              },
-              {
-                "type": "star",
-                "expr": {
-                  "type": "app",
-                  "rule": "nameRest"
-                }
-              }
-            ]
-          },
-          "description": "a name"
-        },
-        "nameFirst": {
-          "name": "nameFirst",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "prim",
-                "obj": "_"
-              },
-              {
-                "type": "app",
-                "rule": "letter"
-              }
-            ]
-          }
-        },
-        "nameRest": {
-          "name": "nameRest",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "prim",
-                "obj": "_"
-              },
-              {
-                "type": "app",
-                "rule": "alnum"
-              }
-            ]
-          }
-        },
-        "ident": {
-          "name": "ident",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "not",
-                "expr": {
-                  "type": "app",
-                  "rule": "keyword"
-                }
-              },
-              {
-                "type": "app",
-                "rule": "name"
-              }
-            ]
-          },
-          "description": "an identifier"
-        },
-        "keyword_null": {
-          "name": "keyword_null",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "null"
-              },
-              {
-                "type": "not",
-                "expr": {
-                  "type": "app",
-                  "rule": "nameRest"
-                }
-              }
-            ]
-          }
-        },
-        "keyword_true": {
-          "name": "keyword_true",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "true"
-              },
-              {
-                "type": "not",
-                "expr": {
-                  "type": "app",
-                  "rule": "nameRest"
-                }
-              }
-            ]
-          }
-        },
-        "keyword_false": {
-          "name": "keyword_false",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "false"
-              },
-              {
-                "type": "not",
-                "expr": {
-                  "type": "app",
-                  "rule": "nameRest"
-                }
-              }
-            ]
-          }
-        },
-        "keyword": {
-          "name": "keyword",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "app",
-                "rule": "keyword_null"
-              },
-              {
-                "type": "app",
-                "rule": "keyword_true"
-              },
-              {
-                "type": "app",
-                "rule": "keyword_false"
-              }
-            ]
-          }
-        },
-        "string": {
-          "name": "string",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "\""
-              },
-              {
-                "type": "star",
-                "expr": {
-                  "type": "app",
-                  "rule": "strChar"
-                }
-              },
-              {
-                "type": "prim",
-                "obj": "\""
-              }
-            ]
-          }
-        },
-        "strChar": {
-          "name": "strChar",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "app",
-                "rule": "escapeChar"
-              },
-              {
-                "type": "seq",
-                "factors": [
-                  {
-                    "type": "not",
-                    "expr": {
-                      "type": "prim",
-                      "obj": "\\"
-                    }
-                  },
-                  {
-                    "type": "not",
-                    "expr": {
-                      "type": "prim",
-                      "obj": "\""
-                    }
-                  },
-                  {
-                    "type": "not",
-                    "expr": {
-                      "type": "prim",
-                      "obj": "\n"
-                    }
-                  },
-                  {
-                    "type": "app",
-                    "rule": "any"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        "escapeChar_backslash": {
-          "name": "escapeChar_backslash",
-          "formals": [],
-          "body": {
-            "type": "prim",
-            "obj": "\\\\"
-          }
-        },
-        "escapeChar_doubleQuote": {
-          "name": "escapeChar_doubleQuote",
-          "formals": [],
-          "body": {
-            "type": "prim",
-            "obj": "\\\""
-          }
-        },
-        "escapeChar_singleQuote": {
-          "name": "escapeChar_singleQuote",
-          "formals": [],
-          "body": {
-            "type": "prim",
-            "obj": "\\'"
-          }
-        },
-        "escapeChar_backspace": {
-          "name": "escapeChar_backspace",
-          "formals": [],
-          "body": {
-            "type": "prim",
-            "obj": "\\b"
-          }
-        },
-        "escapeChar_lineFeed": {
-          "name": "escapeChar_lineFeed",
-          "formals": [],
-          "body": {
-            "type": "prim",
-            "obj": "\\n"
-          }
-        },
-        "escapeChar_carriageReturn": {
-          "name": "escapeChar_carriageReturn",
-          "formals": [],
-          "body": {
-            "type": "prim",
-            "obj": "\\r"
-          }
-        },
-        "escapeChar_tab": {
-          "name": "escapeChar_tab",
-          "formals": [],
-          "body": {
-            "type": "prim",
-            "obj": "\\t"
-          }
-        },
-        "escapeChar_unicodeEscape": {
-          "name": "escapeChar_unicodeEscape",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "\\u"
-              },
-              {
-                "type": "app",
-                "rule": "hexDigit"
-              },
-              {
-                "type": "app",
-                "rule": "hexDigit"
-              },
-              {
-                "type": "app",
-                "rule": "hexDigit"
-              },
-              {
-                "type": "app",
-                "rule": "hexDigit"
-              }
-            ]
-          }
-        },
-        "escapeChar_hexEscape": {
-          "name": "escapeChar_hexEscape",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "\\x"
-              },
-              {
-                "type": "app",
-                "rule": "hexDigit"
-              },
-              {
-                "type": "app",
-                "rule": "hexDigit"
-              }
-            ]
-          }
-        },
-        "escapeChar": {
-          "name": "escapeChar",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "app",
-                "rule": "escapeChar_backslash"
-              },
-              {
-                "type": "app",
-                "rule": "escapeChar_doubleQuote"
-              },
-              {
-                "type": "app",
-                "rule": "escapeChar_singleQuote"
-              },
-              {
-                "type": "app",
-                "rule": "escapeChar_backspace"
-              },
-              {
-                "type": "app",
-                "rule": "escapeChar_lineFeed"
-              },
-              {
-                "type": "app",
-                "rule": "escapeChar_carriageReturn"
-              },
-              {
-                "type": "app",
-                "rule": "escapeChar_tab"
-              },
-              {
-                "type": "app",
-                "rule": "escapeChar_unicodeEscape"
-              },
-              {
-                "type": "app",
-                "rule": "escapeChar_hexEscape"
-              }
-            ]
-          },
-          "description": "an escape sequence"
-        },
-        "number": {
-          "name": "number",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "opt",
-                "expr": {
-                  "type": "prim",
-                  "obj": "-"
-                }
-              },
-              {
-                "type": "plus",
-                "expr": {
-                  "type": "app",
-                  "rule": "digit"
-                }
-              }
-            ]
-          },
-          "description": "a number"
-        },
-        "comment_singleLine": {
-          "name": "comment_singleLine",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "//"
-              },
-              {
-                "type": "star",
-                "expr": {
-                  "type": "seq",
-                  "factors": [
-                    {
-                      "type": "not",
-                      "expr": {
-                        "type": "prim",
-                        "obj": "\n"
-                      }
-                    },
-                    {
-                      "type": "app",
-                      "rule": "any"
-                    }
+         ]
+      ],
+      "comment_multiLine" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  2114,
+                  2136
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2114,
+                     2118
                   ]
-                }
-              },
-              {
-                "type": "prim",
-                "obj": "\n"
-              }
-            ]
-          }
-        },
-        "comment_multiLine": {
-          "name": "comment_multiLine",
-          "formals": [],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "prim",
-                "obj": "/*"
-              },
-              {
-                "type": "star",
-                "expr": {
-                  "type": "seq",
-                  "factors": [
-                    {
-                      "type": "not",
-                      "expr": {
-                        "type": "prim",
-                        "obj": "*/"
-                      }
-                    },
-                    {
-                      "type": "app",
-                      "rule": "any"
-                    }
+               },
+               "/*"
+            ],
+            [
+               "star",
+               {
+                  "sourceInterval" : [
+                     2119,
+                     2131
                   ]
-                }
-              },
-              {
-                "type": "prim",
-                "obj": "*/"
-              }
-            ]
-          }
-        },
-        "comment": {
-          "name": "comment",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "app",
-                "rule": "comment_singleLine"
-              },
-              {
-                "type": "app",
-                "rule": "comment_multiLine"
-              }
-            ]
-          }
-        },
-        "tokens": {
-          "name": "tokens",
-          "formals": [],
-          "body": {
-            "type": "star",
-            "expr": {
-              "type": "app",
-              "rule": "token"
-            }
-          }
-        },
-        "token": {
-          "name": "token",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "app",
-                "rule": "caseName"
-              },
-              {
-                "type": "app",
-                "rule": "comment"
-              },
-              {
-                "type": "app",
-                "rule": "ident"
-              },
-              {
-                "type": "app",
-                "rule": "keyword"
-              },
-              {
-                "type": "app",
-                "rule": "number"
-              },
-              {
-                "type": "app",
-                "rule": "operator"
-              },
-              {
-                "type": "app",
-                "rule": "punctuation"
-              },
-              {
-                "type": "app",
-                "rule": "string"
-              },
-              {
-                "type": "app",
-                "rule": "any"
-              }
-            ]
-          }
-        },
-        "operator": {
-          "name": "operator",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "prim",
-                "obj": "<:"
-              },
-              {
-                "type": "prim",
-                "obj": "="
-              },
-              {
-                "type": "prim",
-                "obj": ":="
-              },
-              {
-                "type": "prim",
-                "obj": "+="
-              },
-              {
-                "type": "prim",
-                "obj": "*"
-              },
-              {
-                "type": "prim",
-                "obj": "+"
-              },
-              {
-                "type": "prim",
-                "obj": "?"
-              },
-              {
-                "type": "prim",
-                "obj": "~"
-              },
-              {
-                "type": "prim",
-                "obj": "&"
-              }
-            ]
-          }
-        },
-        "punctuation": {
-          "name": "punctuation",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "prim",
-                "obj": "<"
-              },
-              {
-                "type": "prim",
-                "obj": ">"
-              },
-              {
-                "type": "prim",
-                "obj": ","
-              },
-              {
-                "type": "prim",
-                "obj": "--"
-              }
-            ]
-          }
-        }
-      },
-      "extensions": {
-        "space": {
-          "name": "space",
-          "formals": [],
-          "body": {
-            "type": "app",
-            "rule": "comment"
-          }
-        }
-      },
-      "overrides": {}
-    },
-    "BuiltInRules": {
-      "name": "BuiltInRules",
-      "superGrammar": "ProtoBuiltInRules",
-      "definitions": {
-        "alnum": {
-          "name": "alnum",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "app",
-                "rule": "letter"
-              },
-              {
-                "type": "app",
-                "rule": "digit"
-              }
-            ]
-          },
-          "description": "an alpha-numeric character"
-        },
-        "letter": {
-          "name": "letter",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "app",
-                "rule": "lower"
-              },
-              {
-                "type": "app",
-                "rule": "upper"
-              },
-              {
-                "type": "app",
-                "rule": "unicodeLtmo"
-              }
-            ]
-          },
-          "description": "a letter"
-        },
-        "digit": {
-          "name": "digit",
-          "formals": [],
-          "body": {
-            "type": "range",
-            "from": "0",
-            "to": "9"
-          },
-          "description": "a digit"
-        },
-        "hexDigit": {
-          "name": "hexDigit",
-          "formals": [],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "app",
-                "rule": "digit"
-              },
-              {
-                "type": "range",
-                "from": "a",
-                "to": "f"
-              },
-              {
-                "type": "range",
-                "from": "A",
-                "to": "F"
-              }
-            ]
-          },
-          "description": "a hexadecimal digit"
-        },
-        "ListOf": {
-          "name": "ListOf",
-          "formals": [
-            "elem",
-            "sep"
-          ],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "app",
-                "rule": "NonemptyListOf",
-                "args": [
+               },
+               [
+                  "seq",
                   {
-                    "type": "param",
-                    "index": 0
+                     "sourceInterval" : [
+                        2120,
+                        2129
+                     ]
                   },
-                  {
-                    "type": "param",
-                    "index": 1
-                  }
-                ]
-              },
-              {
-                "type": "app",
-                "rule": "EmptyListOf",
-                "args": [
-                  {
-                    "type": "param",
-                    "index": 0
-                  },
-                  {
-                    "type": "param",
-                    "index": 1
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        "NonemptyListOf": {
-          "name": "NonemptyListOf",
-          "formals": [
-            "elem",
-            "sep"
-          ],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "param",
-                "index": 0
-              },
-              {
-                "type": "star",
-                "expr": {
-                  "type": "seq",
-                  "factors": [
-                    {
-                      "type": "param",
-                      "index": 1
-                    },
-                    {
-                      "type": "param",
-                      "index": 0
-                    }
+                  [
+                     "not",
+                     {
+                        "sourceInterval" : [
+                           2120,
+                           2125
+                        ]
+                     },
+                     [
+                        "terminal",
+                        {
+                           "sourceInterval" : [
+                              2121,
+                              2125
+                           ]
+                        },
+                        "*/"
+                     ]
+                  ],
+                  [
+                     "app",
+                     {
+                        "sourceInterval" : [
+                           2126,
+                           2129
+                        ]
+                     },
+                     "any",
+                     []
                   ]
-                }
-              }
-            ]
-          }
-        },
-        "EmptyListOf": {
-          "name": "EmptyListOf",
-          "formals": [
-            "elem",
-            "sep"
-          ],
-          "body": {
-            "type": "seq",
-            "factors": []
-          }
-        },
-        "listOf": {
-          "name": "listOf",
-          "formals": [
-            "elem",
-            "sep"
-          ],
-          "body": {
-            "type": "alt",
-            "terms": [
-              {
-                "type": "app",
-                "rule": "nonemptyListOf",
-                "args": [
-                  {
-                    "type": "param",
-                    "index": 0
-                  },
-                  {
-                    "type": "param",
-                    "index": 1
-                  }
-                ]
-              },
-              {
-                "type": "app",
-                "rule": "emptyListOf",
-                "args": [
-                  {
-                    "type": "param",
-                    "index": 0
-                  },
-                  {
-                    "type": "param",
-                    "index": 1
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        "nonemptyListOf": {
-          "name": "nonemptyListOf",
-          "formals": [
-            "elem",
-            "sep"
-          ],
-          "body": {
-            "type": "seq",
-            "factors": [
-              {
-                "type": "param",
-                "index": 0
-              },
-              {
-                "type": "star",
-                "expr": {
-                  "type": "seq",
-                  "factors": [
-                    {
-                      "type": "param",
-                      "index": 1
-                    },
-                    {
-                      "type": "param",
-                      "index": 0
-                    }
+               ]
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2132,
+                     2136
                   ]
-                }
-              }
+               },
+               "*/"
             ]
-          }
-        },
-        "emptyListOf": {
-          "name": "emptyListOf",
-          "formals": [
-            "elem",
-            "sep"
-          ],
-          "body": {
-            "type": "seq",
-            "factors": []
-          }
-        }
-      },
-      "extensions": {},
-      "overrides": {}
-    },
-    "ProtoBuiltInRules": {
-      "name": "ProtoBuiltInRules",
-      "definitions": {
-        "any": {
-          "name": "any",
-          "formals": [],
-          "body": {
-            "type": "any"
-          },
-          "description": "any object"
-        },
-        "end": {
-          "name": "end",
-          "formals": [],
-          "body": {
-            "type": "end"
-          },
-          "description": "end of input"
-        },
-        "lower": {
-          "name": "lower",
-          "formals": [],
-          "body": {
-            "type": "unicodeChar",
-            "category": "Ll"
-          },
-          "description": "a lowercase letter"
-        },
-        "spaces": {
-          "name": "spaces",
-          "formals": [],
-          "body": {
-            "type": "star",
-            "expr": {
-              "type": "app",
-              "rule": "space"
-            }
-          }
-        },
-        "space": {
-          "name": "space",
-          "formals": [],
-          "body": {
-            "type": "range",
-            "from": "\u0000",
-            "to": " "
-          },
-          "description": "a space"
-        },
-        "unicodeLtmo": {
-          "name": "unicodeLtmo",
-          "formals": [],
-          "body": {
-            "type": "unicodeChar",
-            "category": "Ltmo"
-          }
-        },
-        "upper": {
-          "name": "upper",
-          "formals": [],
-          "body": {
-            "type": "unicodeChar",
-            "category": "Lu"
-          },
-          "description": "an uppercase letter"
-        },
-        "Boolean": {
-          "name": "Boolean",
-          "formals": [],
-          "body": {
-            "type": "typeCheck",
-            "expectedType": "boolean"
-          }
-        },
-        "Number": {
-          "name": "Number",
-          "formals": [],
-          "body": {
-            "type": "typeCheck",
-            "expectedType": "number"
-          }
-        },
-        "String": {
-          "name": "String",
-          "formals": [],
-          "body": {
-            "type": "typeCheck",
-            "expectedType": "string"
-          }
-        }
-      },
-      "extensions": {},
-      "overrides": {}
-    }
-  }
-}
+         ]
+      ],
+      "Pred_not" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  646,
+                  653
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     646,
+                     649
+                  ]
+               },
+               "~"
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     650,
+                     653
+                  ]
+               },
+               "Lex",
+               []
+            ]
+         ]
+      ],
+      "space" : [
+         "extend",
+         {},
+         null,
+         [],
+         [
+            "app",
+            {
+               "sourceInterval" : [
+                  2045,
+                  2052
+               ]
+            },
+            "comment",
+            []
+         ]
+      ],
+      "nameRest" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  1274,
+                  1289
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     1274,
+                     1277
+                  ]
+               },
+               "_"
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1284,
+                     1289
+                  ]
+               },
+               "alnum",
+               []
+            ]
+         ]
+      ],
+      "Iter_plus" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  580,
+                  588
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     580,
+                     584
+                  ]
+               },
+               "Pred",
+               []
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     585,
+                     588
+                  ]
+               },
+               "+"
+            ]
+         ]
+      ],
+      "escapeChar" : [
+         "define",
+         {},
+         "an escape sequence",
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  1472,
+                  2029
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1472,
+                     1478
+                  ]
+               },
+               "escapeChar_backslash",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1534,
+                     1540
+                  ]
+               },
+               "escapeChar_doubleQuote",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1598,
+                     1604
+                  ]
+               },
+               "escapeChar_singleQuote",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1662,
+                     1667
+                  ]
+               },
+               "escapeChar_backspace",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1724,
+                     1729
+                  ]
+               },
+               "escapeChar_lineFeed",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1785,
+                     1790
+                  ]
+               },
+               "escapeChar_carriageReturn",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1852,
+                     1857
+                  ]
+               },
+               "escapeChar_tab",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1908,
+                     1949
+                  ]
+               },
+               "escapeChar_unicodeEscape",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1974,
+                     1997
+                  ]
+               },
+               "escapeChar_hexEscape",
+               []
+            ]
+         ]
+      ],
+      "Rule_override" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  188,
+                  227
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     188,
+                     193
+                  ]
+               },
+               "ident",
+               []
+            ],
+            [
+               "opt",
+               {
+                  "sourceInterval" : [
+                     194,
+                     202
+                  ]
+               },
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        194,
+                        201
+                     ]
+                  },
+                  "Formals",
+                  []
+               ]
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     214,
+                     218
+                  ]
+               },
+               ":="
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     219,
+                     227
+                  ]
+               },
+               "RuleBody",
+               []
+            ]
+         ]
+      ],
+      "Rule_define" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  131,
+                  170
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     131,
+                     136
+                  ]
+               },
+               "ident",
+               []
+            ],
+            [
+               "opt",
+               {
+                  "sourceInterval" : [
+                     137,
+                     145
+                  ]
+               },
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        137,
+                        144
+                     ]
+                  },
+                  "Formals",
+                  []
+               ]
+            ],
+            [
+               "opt",
+               {
+                  "sourceInterval" : [
+                     146,
+                     156
+                  ]
+               },
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        146,
+                        155
+                     ]
+                  },
+                  "ruleDescr",
+                  []
+               ]
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     157,
+                     160
+                  ]
+               },
+               "="
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     162,
+                     170
+                  ]
+               },
+               "RuleBody",
+               []
+            ]
+         ]
+      ],
+      "SuperGrammar" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  106,
+                  116
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     106,
+                     110
+                  ]
+               },
+               "<:"
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     111,
+                     116
+                  ]
+               },
+               "ident",
+               []
+            ]
+         ]
+      ],
+      "Lex" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  713,
+                  740
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     713,
+                     721
+                  ]
+               },
+               "Lex_lex",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     736,
+                     740
+                  ]
+               },
+               "Base",
+               []
+            ]
+         ]
+      ],
+      "Iter" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  556,
+                  631
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     556,
+                     564
+                  ]
+               },
+               "Iter_star",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     580,
+                     588
+                  ]
+               },
+               "Iter_plus",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     604,
+                     612
+                  ]
+               },
+               "Iter_opt",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     627,
+                     631
+                  ]
+               },
+               "Pred",
+               []
+            ]
+         ]
+      ],
+      "Pred" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  646,
+                  699
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     646,
+                     653
+                  ]
+               },
+               "Pred_not",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     668,
+                     675
+                  ]
+               },
+               "Pred_lookahead",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     696,
+                     699
+                  ]
+               },
+               "Lex",
+               []
+            ]
+         ]
+      ],
+      "Formals" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  427,
+                  453
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     427,
+                     430
+                  ]
+               },
+               "<"
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     431,
+                     449
+                  ]
+               },
+               "ListOf",
+               [
+                  [
+                     "app",
+                     {
+                        "sourceInterval" : [
+                           438,
+                           443
+                        ]
+                     },
+                     "ident",
+                     []
+                  ],
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           445,
+                           448
+                        ]
+                     },
+                     ","
+                  ]
+               ]
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     450,
+                     453
+                  ]
+               },
+               ">"
+            ]
+         ]
+      ],
+      "escapeChar_unicodeEscape" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  1908,
+                  1949
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     1908,
+                     1913
+                  ]
+               },
+               "\\u"
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1914,
+                     1922
+                  ]
+               },
+               "hexDigit",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1923,
+                     1931
+                  ]
+               },
+               "hexDigit",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1932,
+                     1940
+                  ]
+               },
+               "hexDigit",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1941,
+                     1949
+                  ]
+               },
+               "hexDigit",
+               []
+            ]
+         ]
+      ],
+      "TopLevelTerm" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  376,
+                  409
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     376,
+                     388
+                  ]
+               },
+               "TopLevelTerm_inline",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     406,
+                     409
+                  ]
+               },
+               "Seq",
+               []
+            ]
+         ]
+      ],
+      "Base_paren" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  950,
+                  961
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     950,
+                     953
+                  ]
+               },
+               "("
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     954,
+                     957
+                  ]
+               },
+               "Alt",
+               []
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     958,
+                     961
+                  ]
+               },
+               ")"
+            ]
+         ]
+      ],
+      "Pred_lookahead" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  668,
+                  675
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     668,
+                     671
+                  ]
+               },
+               "&"
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     672,
+                     675
+                  ]
+               },
+               "Lex",
+               []
+            ]
+         ]
+      ],
+      "comment_singleLine" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  2070,
+                  2092
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2070,
+                     2074
+                  ]
+               },
+               "//"
+            ],
+            [
+               "star",
+               {
+                  "sourceInterval" : [
+                     2075,
+                     2087
+                  ]
+               },
+               [
+                  "seq",
+                  {
+                     "sourceInterval" : [
+                        2076,
+                        2085
+                     ]
+                  },
+                  [
+                     "not",
+                     {
+                        "sourceInterval" : [
+                           2076,
+                           2081
+                        ]
+                     },
+                     [
+                        "terminal",
+                        {
+                           "sourceInterval" : [
+                              2077,
+                              2081
+                           ]
+                        },
+                        "\n"
+                     ]
+                  ],
+                  [
+                     "app",
+                     {
+                        "sourceInterval" : [
+                           2082,
+                           2085
+                        ]
+                     },
+                     "any",
+                     []
+                  ]
+               ]
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2088,
+                     2092
+                  ]
+               },
+               "\n"
+            ]
+         ]
+      ],
+      "Rule" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  131,
+                  297
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     131,
+                     170
+                  ]
+               },
+               "Rule_define",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     188,
+                     227
+                  ]
+               },
+               "Rule_override",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     247,
+                     286
+                  ]
+               },
+               "Rule_extend",
+               []
+            ]
+         ]
+      ],
+      "Iter_opt" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  604,
+                  612
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     604,
+                     608
+                  ]
+               },
+               "Pred",
+               []
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     609,
+                     612
+                  ]
+               },
+               "?"
+            ]
+         ]
+      ],
+      "Alt" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  508,
+                  522
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     508,
+                     511
+                  ]
+               },
+               "Seq",
+               []
+            ],
+            [
+               "star",
+               {
+                  "sourceInterval" : [
+                     512,
+                     522
+                  ]
+               },
+               [
+                  "seq",
+                  {
+                     "sourceInterval" : [
+                        513,
+                        520
+                     ]
+                  },
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           513,
+                           516
+                        ]
+                     },
+                     "|"
+                  ],
+                  [
+                     "app",
+                     {
+                        "sourceInterval" : [
+                           517,
+                           520
+                        ]
+                     },
+                     "Seq",
+                     []
+                  ]
+               ]
+            ]
+         ]
+      ],
+      "punctuation" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  2336,
+                  2358
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2336,
+                     2339
+                  ]
+               },
+               "<"
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2342,
+                     2345
+                  ]
+               },
+               ">"
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2348,
+                     2351
+                  ]
+               },
+               ","
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2354,
+                     2358
+                  ]
+               },
+               "--"
+            ]
+         ]
+      ],
+      "Grammars" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "star",
+            {
+               "sourceInterval" : [
+                  24,
+                  32
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     24,
+                     31
+                  ]
+               },
+               "Grammar",
+               []
+            ]
+         ]
+      ],
+      "Lex_lex" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  713,
+                  721
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     713,
+                     716
+                  ]
+               },
+               "#"
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     717,
+                     721
+                  ]
+               },
+               "Base",
+               []
+            ]
+         ]
+      ],
+      "Rule_extend" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  247,
+                  286
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     247,
+                     252
+                  ]
+               },
+               "ident",
+               []
+            ],
+            [
+               "opt",
+               {
+                  "sourceInterval" : [
+                     253,
+                     261
+                  ]
+               },
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        253,
+                        260
+                     ]
+                  },
+                  "Formals",
+                  []
+               ]
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     273,
+                     277
+                  ]
+               },
+               "+="
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     278,
+                     286
+                  ]
+               },
+               "RuleBody",
+               []
+            ]
+         ]
+      ],
+      "nameFirst" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  1239,
+                  1255
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     1239,
+                     1242
+                  ]
+               },
+               "_"
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1249,
+                     1255
+                  ]
+               },
+               "letter",
+               []
+            ]
+         ]
+      ],
+      "escapeChar_singleQuote" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "terminal",
+            {
+               "sourceInterval" : [
+                  1598,
+                  1604
+               ]
+            },
+            "\\'"
+         ]
+      ],
+      "tokens" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "star",
+            {
+               "sourceInterval" : [
+                  2163,
+                  2169
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2163,
+                     2168
+                  ]
+               },
+               "token",
+               []
+            ]
+         ]
+      ],
+      "terminalChar" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  1391,
+                  1429
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1391,
+                     1401
+                  ]
+               },
+               "escapeChar",
+               []
+            ],
+            [
+               "seq",
+               {
+                  "sourceInterval" : [
+                     1408,
+                     1429
+                  ]
+               },
+               [
+                  "not",
+                  {
+                     "sourceInterval" : [
+                        1408,
+                        1413
+                     ]
+                  },
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           1409,
+                           1413
+                        ]
+                     },
+                     "\\"
+                  ]
+               ],
+               [
+                  "not",
+                  {
+                     "sourceInterval" : [
+                        1414,
+                        1419
+                     ]
+                  },
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           1415,
+                           1419
+                        ]
+                     },
+                     "\""
+                  ]
+               ],
+               [
+                  "not",
+                  {
+                     "sourceInterval" : [
+                        1420,
+                        1425
+                     ]
+                  },
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           1421,
+                           1425
+                        ]
+                     },
+                     "\n"
+                  ]
+               ],
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        1426,
+                        1429
+                     ]
+                  },
+                  "any",
+                  []
+               ]
+            ]
+         ]
+      ],
+      "escapeChar_carriageReturn" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "terminal",
+            {
+               "sourceInterval" : [
+                  1785,
+                  1790
+               ]
+            },
+            "\\r"
+         ]
+      ],
+      "terminal" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  1345,
+                  1368
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     1345,
+                     1349
+                  ]
+               },
+               "\""
+            ],
+            [
+               "star",
+               {
+                  "sourceInterval" : [
+                     1350,
+                     1363
+                  ]
+               },
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        1350,
+                        1362
+                     ]
+                  },
+                  "terminalChar",
+                  []
+               ]
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     1364,
+                     1368
+                  ]
+               },
+               "\""
+            ]
+         ]
+      ],
+      "RuleBody" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  316,
+                  353
+               ]
+            },
+            [
+               "opt",
+               {
+                  "sourceInterval" : [
+                     316,
+                     320
+                  ]
+               },
+               [
+                  "terminal",
+                  {
+                     "sourceInterval" : [
+                        316,
+                        319
+                     ]
+                  },
+                  "|"
+               ]
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     321,
+                     333
+                  ]
+               },
+               "TopLevelTerm",
+               []
+            ],
+            [
+               "star",
+               {
+                  "sourceInterval" : [
+                     334,
+                     353
+                  ]
+               },
+               [
+                  "seq",
+                  {
+                     "sourceInterval" : [
+                        335,
+                        351
+                     ]
+                  },
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           335,
+                           338
+                        ]
+                     },
+                     "|"
+                  ],
+                  [
+                     "app",
+                     {
+                        "sourceInterval" : [
+                           339,
+                           351
+                        ]
+                     },
+                     "TopLevelTerm",
+                     []
+                  ]
+               ]
+            ]
+         ]
+      ],
+      "Base" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  755,
+                  1005
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     755,
+                     800
+                  ]
+               },
+               "Base_application",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     823,
+                     845
+                  ]
+               },
+               "Base_range",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     885,
+                     893
+                  ]
+               },
+               "Base_terminal",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     950,
+                     961
+                  ]
+               },
+               "Base_paren",
+               []
+            ]
+         ]
+      ],
+      "ident" : [
+         "define",
+         {},
+         "an identifier",
+         [],
+         [
+            "app",
+            {
+               "sourceInterval" : [
+                  1322,
+                  1326
+               ]
+            },
+            "name",
+            []
+         ]
+      ],
+      "TopLevelTerm_inline" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  376,
+                  388
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     376,
+                     379
+                  ]
+               },
+               "Seq",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     380,
+                     388
+                  ]
+               },
+               "caseName",
+               []
+            ]
+         ]
+      ],
+      "caseName" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  1122,
+                  1175
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     1122,
+                     1126
+                  ]
+               },
+               "--"
+            ],
+            [
+               "star",
+               {
+                  "sourceInterval" : [
+                     1127,
+                     1141
+                  ]
+               },
+               [
+                  "seq",
+                  {
+                     "sourceInterval" : [
+                        1128,
+                        1139
+                     ]
+                  },
+                  [
+                     "not",
+                     {
+                        "sourceInterval" : [
+                           1128,
+                           1133
+                        ]
+                     },
+                     [
+                        "terminal",
+                        {
+                           "sourceInterval" : [
+                              1129,
+                              1133
+                           ]
+                        },
+                        "\n"
+                     ]
+                  ],
+                  [
+                     "app",
+                     {
+                        "sourceInterval" : [
+                           1134,
+                           1139
+                        ]
+                     },
+                     "space",
+                     []
+                  ]
+               ]
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1142,
+                     1146
+                  ]
+               },
+               "name",
+               []
+            ],
+            [
+               "star",
+               {
+                  "sourceInterval" : [
+                     1147,
+                     1161
+                  ]
+               },
+               [
+                  "seq",
+                  {
+                     "sourceInterval" : [
+                        1148,
+                        1159
+                     ]
+                  },
+                  [
+                     "not",
+                     {
+                        "sourceInterval" : [
+                           1148,
+                           1153
+                        ]
+                     },
+                     [
+                        "terminal",
+                        {
+                           "sourceInterval" : [
+                              1149,
+                              1153
+                           ]
+                        },
+                        "\n"
+                     ]
+                  ],
+                  [
+                     "app",
+                     {
+                        "sourceInterval" : [
+                           1154,
+                           1159
+                        ]
+                     },
+                     "space",
+                     []
+                  ]
+               ]
+            ],
+            [
+               "alt",
+               {
+                  "sourceInterval" : [
+                     1163,
+                     1174
+                  ]
+               },
+               [
+                  "terminal",
+                  {
+                     "sourceInterval" : [
+                        1163,
+                        1167
+                     ]
+                  },
+                  "\n"
+               ],
+               [
+                  "lookahead",
+                  {
+                     "sourceInterval" : [
+                        1170,
+                        1174
+                     ]
+                  },
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           1171,
+                           1174
+                        ]
+                     },
+                     "}"
+                  ]
+               ]
+            ]
+         ]
+      ],
+      "ruleDescr" : [
+         "define",
+         {},
+         "a rule description",
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  1047,
+                  1068
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     1047,
+                     1050
+                  ]
+               },
+               "("
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1051,
+                     1064
+                  ]
+               },
+               "ruleDescrText",
+               []
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     1065,
+                     1068
+                  ]
+               },
+               ")"
+            ]
+         ]
+      ],
+      "escapeChar_hexEscape" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  1974,
+                  1997
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     1974,
+                     1979
+                  ]
+               },
+               "\\x"
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1980,
+                     1988
+                  ]
+               },
+               "hexDigit",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1989,
+                     1997
+                  ]
+               },
+               "hexDigit",
+               []
+            ]
+         ]
+      ],
+      "escapeChar_tab" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "terminal",
+            {
+               "sourceInterval" : [
+                  1852,
+                  1857
+               ]
+            },
+            "\\t"
+         ]
+      ],
+      "comment" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  2070,
+                  2150
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2070,
+                     2092
+                  ]
+               },
+               "comment_singleLine",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2114,
+                     2136
+                  ]
+               },
+               "comment_multiLine",
+               []
+            ]
+         ]
+      ],
+      "escapeChar_backslash" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "terminal",
+            {
+               "sourceInterval" : [
+                  1472,
+                  1478
+               ]
+            },
+            "\\\\"
+         ]
+      ],
+      "escapeChar_backspace" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "terminal",
+            {
+               "sourceInterval" : [
+                  1662,
+                  1667
+               ]
+            },
+            "\\b"
+         ]
+      ],
+      "ruleDescrText" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "star",
+            {
+               "sourceInterval" : [
+                  1092,
+                  1103
+               ]
+            },
+            [
+               "seq",
+               {
+                  "sourceInterval" : [
+                     1093,
+                     1101
+                  ]
+               },
+               [
+                  "not",
+                  {
+                     "sourceInterval" : [
+                        1093,
+                        1097
+                     ]
+                  },
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           1094,
+                           1097
+                        ]
+                     },
+                     ")"
+                  ]
+               ],
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        1098,
+                        1101
+                     ]
+                  },
+                  "any",
+                  []
+               ]
+            ]
+         ]
+      ],
+      "Seq" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "star",
+            {
+               "sourceInterval" : [
+                  536,
+                  541
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     536,
+                     540
+                  ]
+               },
+               "Iter",
+               []
+            ]
+         ]
+      ],
+      "escapeChar_doubleQuote" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "terminal",
+            {
+               "sourceInterval" : [
+                  1534,
+                  1540
+               ]
+            },
+            "\\\""
+         ]
+      ],
+      "token" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  2181,
+                  2249
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2181,
+                     2189
+                  ]
+               },
+               "caseName",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2192,
+                     2199
+                  ]
+               },
+               "comment",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2202,
+                     2207
+                  ]
+               },
+               "ident",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2210,
+                     2218
+                  ]
+               },
+               "operator",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2221,
+                     2232
+                  ]
+               },
+               "punctuation",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2235,
+                     2243
+                  ]
+               },
+               "terminal",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2246,
+                     2249
+                  ]
+               },
+               "any",
+               []
+            ]
+         ]
+      ]
+   }
+]

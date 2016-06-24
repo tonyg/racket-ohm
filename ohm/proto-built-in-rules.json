@@ -1,0 +1,90 @@
+[
+   "grammar",
+   {},
+   "ProtoBuiltInRules",
+   null,
+   null,
+   {
+      "spaces" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "star",
+            {},
+            [
+               "app",
+               {},
+               "space",
+               []
+            ]
+         ]
+      ],
+      "upper" : [
+         "define",
+         {},
+         "an uppercase letter",
+         [],
+         [
+            "unicodeChar",
+            {},
+            "Lu"
+         ]
+      ],
+      "space" : [
+         "define",
+         {},
+         "a space",
+         [],
+         [
+            "range",
+            {},
+            "\u0000",
+            " "
+         ]
+      ],
+      "lower" : [
+         "define",
+         {},
+         "a lowercase letter",
+         [],
+         [
+            "unicodeChar",
+            {},
+            "Ll"
+         ]
+      ],
+      "any" : [
+         "define",
+         {},
+         "any object",
+         [],
+         [
+            "any",
+            {}
+         ]
+      ],
+      "unicodeLtmo" : [
+         "define",
+         {},
+         null,
+         [],
+         [
+            "unicodeChar",
+            {},
+            "Ltmo"
+         ]
+      ],
+      "end" : [
+         "define",
+         {},
+         "end of input",
+         [],
+         [
+            "end",
+            {}
+         ]
+      ]
+   }
+]
