@@ -1,6 +1,6 @@
 #lang racket/base
 
-(provide )
+(provide parse-ohm)
 
 (require racket/match)
 (require (only-in racket/list flatten))
@@ -143,8 +143,8 @@
   (define v (call-with-input-file
               input-filename
               (lambda (p)
-                (grammar-match #:input-source-name input-filename
-                               ohm-grammar-grammar p))))
+                (read/grammar #:input-source-name input-filename
+                              ohm-grammar-grammar p))))
   (define new-ohm-grammar-grammar (hash-ref (parse-ohm v) 'Ohm))
   ;; (pretty-print new-ohm-grammar-grammar)
 

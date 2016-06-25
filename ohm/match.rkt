@@ -7,7 +7,7 @@
          (struct-out ohm-terminal)
          (struct-out ohm-nonterminal)
          ohm-node->s-expression
-         grammar-match
+         read/grammar
          ohm-match
          ohm-semantics)
 
@@ -291,16 +291,16 @@
               (list built-in-rules
                     proto-built-in-rules)))))
 
-(define (grammar-match g
-                       source0
-                       #:input-source-name [input-source-name #f]
-                       #:rule-name [rule-name (ohm-grammar-default-start-rule g)]
-                       #:grammars [grammars (hash)])
+(define (read/grammar g
+                      [source0 (current-input-port)]
+                      #:input-source-name [input-source-name #f]
+                      #:rule-name [rule-name (ohm-grammar-default-start-rule g)]
+                      #:grammars [grammars (hash)])
   (define source
     (cond
       [(port? source0) (port->input-source source0)]
       [(input-source? source0) source0]
-      [else (error 'grammar-match "Expected port or input-source; got ~v" source0)]))
+      [else (error 'read/grammar "Expected port or input-source; got ~v" source0)]))
   (define r
     (parameterize ((current-input-source-name input-source-name)
                    (current-input-source (box source))
