@@ -6,6 +6,8 @@
          (struct-out ohm-node)
          (struct-out ohm-terminal)
          (struct-out ohm-nonterminal)
+         (struct-out exn:fail:read:ohm)
+         (struct-out failing-pexpr)
          ohm-node->s-expression
          read/grammar
          ohm-match
@@ -13,8 +15,9 @@
 
 (require racket/match)
 (require racket/set)
-(require (only-in racket/list make-list))
+(require (only-in racket/list make-list group-by))
 (require syntax/srcloc)
+(require (only-in racket/string string-join))
 
 (require (for-syntax racket/base))
 
@@ -32,6 +35,9 @@
 (struct ohm-terminal ohm-node (value) #:prefab)
 (struct ohm-nonterminal ohm-node (rule-name children) #:prefab)
 
+(struct exn:fail:read:ohm exn:fail:read (failing-pexprs) #:transparent)
+(struct failing-pexpr (rule-name expr) #:transparent)
+
 (struct pos-info (pos [cache #:mutable]) #:transparent)
 
 (struct environment (inheritance-chain bindings) #:transparent)
@@ -45,11 +51,12 @@
 (define current-input-source-name (make-parameter #f))
 (define current-input-source (make-parameter #f))
 (define current-rule-name (make-parameter #f))
+(define current-rule-name-for-failures (make-parameter #f))
 (define current-bindings (make-parameter #f))
 (define in-lexified-context? (make-parameter #f))
 (define current-memo-table (make-parameter #f))
 (define current-rightmost-failure-position (make-parameter #f))
-(define current-rightmost-failure-exprs (make-parameter #f))
+(define current-rightmost-failing-pexprs (make-parameter #f))
 
 (define (pos-info-at pos)
   (hash-ref (current-memo-table)
@@ -130,9 +137,12 @@
   (cond
     [(> new-offset old-offset)
      (current-rightmost-failure-position (input-source-position is))
-     (current-rightmost-failure-exprs (set expr))]
+     (current-rightmost-failing-pexprs
+      (set (failing-pexpr (current-rule-name-for-failures) expr)))]
     [(= new-offset old-offset)
-     (current-rightmost-failure-exprs (set-add (current-rightmost-failure-exprs) expr))]
+     (current-rightmost-failing-pexprs
+      (set-add (current-rightmost-failing-pexprs)
+               (failing-pexpr (current-rule-name-for-failures) expr)))]
     [else (void)])
   #f)
 
@@ -154,7 +164,7 @@
   (syntax-rules ()
     [(_ body ...)
      (parameterize ((current-rightmost-failure-position (position -1 -1 0))
-                    (current-rightmost-failure-exprs #f))
+                    (current-rightmost-failing-pexprs #f))
        body ...)]))
 
 (define-syntax with-ignored-bindings
@@ -249,7 +259,12 @@
                  application
                  (lambda ()
                    (define entry
-                     (cons (parameterize ((current-rule-name rule-name))
+                     (cons (parameterize ((current-rule-name rule-name)
+                                          (current-rule-name-for-failures
+                                           (if (or (not (current-rule-name-for-failures))
+                                                   (in-syntactic-context?))
+                                               rule-name
+                                               (current-rule-name-for-failures))))
                              (eval-pexpr/bindings (environment (environment-inheritance-chain env)
                                                                actuals)
                                                   (lookup-rule-body env rule-name)))
@@ -291,11 +306,69 @@
               (list built-in-rules
                     proto-built-in-rules)))))
 
+(define (pexpr->expected expr)
+  (match expr
+    [(pexpr-any) "any character"]
+    [(pexpr-end) "end-of-file"]
+    [(pexpr-prim obj) (format "the token ~v" obj)]
+    [(pexpr-range from to) (format "anything between ~v and ~v" from to)]
+    [(pexpr-param _) "something matching one of the parameters given to a parameterized rule"]
+    [(pexpr-alt (list* p _)) (pexpr->expected p)]
+    [(pexpr-seq (list* p _)) (pexpr->expected p)]
+    [(pexpr-iter p) (pexpr->expected p)]
+    [(pexpr-not p) (string-append "anything but " (pexpr->expected p))]
+    [(pexpr-lookahead p) (pexpr->expected p)]
+    [(pexpr-lex p) (pexpr->expected p)]
+    [(pexpr-apply r _) (format "something matching rule ~a" r)]
+    [(pexpr-unicode-char category) (format "a Unicode character in category ~v" category)]))
+
+(define (failing-pexprs->string failing-pexprs-set)
+  (define failing-pexprs (set->list failing-pexprs-set))
+  (define grouped-by-rule-name (group-by failing-pexpr-rule-name failing-pexprs))
+  (string-join
+   (for/list [(entries grouped-by-rule-name)]
+     (define rule-name (failing-pexpr-rule-name (car entries)))
+     (if (null? (cdr entries))
+         (format "   - ~a in order to match rule ~a"
+                 (pexpr->expected (failing-pexpr-expr (car entries)))
+                 rule-name)
+         (format "   - in order to match rule ~a, any of\n~a"
+                 rule-name
+                 (string-join
+                  (sort
+                   (for/list [(fp entries)]
+                     (format "       - ~a" (pexpr->expected (failing-pexpr-expr fp))))
+                   string<?)
+                  "\n"))))
+   "\n"))
+
+(define (build-exn:fail:read:ohm input-source-name
+                                 grammar-name
+                                 start-rule
+                                 pos
+                                 failing-pexprs)
+  (define loc (srcloc input-source-name
+                      (position-line pos)
+                      (position-col pos)
+                      (position-offset pos)
+                      #f))
+  (exn:fail:read:ohm
+   (format "Parse error at ~a while trying to read ~a using grammar ~a:\nExpected one of:\n~a"
+           (source-location->string loc)
+           start-rule
+           grammar-name
+           (failing-pexprs->string failing-pexprs))
+   (current-continuation-marks)
+   (list loc)
+   failing-pexprs))
+
 (define (read/grammar g
                       [source0 (current-input-port)]
                       #:input-source-name [input-source-name #f]
-                      #:rule-name [rule-name (ohm-grammar-default-start-rule g)]
-                      #:grammars [grammars (hash)])
+                      #:start-rule [start-rule (ohm-grammar-default-start-rule g)]
+                      #:grammars [grammars (hash)]
+                      #:on-success [ks values]
+                      #:on-failure [kf raise])
   (define source
     (cond
       [(port? source0) (port->input-source source0)]
@@ -308,8 +381,15 @@
                    (current-memo-table (hash)))
       (define env (environment (build-inheritance-chain g grammars) '#()))
       (with-restored-failure-info
-        (eval-pexpr/bindings env (pexpr-apply rule-name '())))))
-  (and r (car r)))
+        (or (eval-pexpr/bindings env (pexpr-apply start-rule '()))
+            (build-exn:fail:read:ohm (current-input-source-name)
+                                     (ohm-grammar-name g)
+                                     start-rule
+                                     (current-rightmost-failure-position)
+                                     (current-rightmost-failing-pexprs))))))
+  (if (exn:fail:read:ohm? r)
+      (kf r)
+      (ks (car r))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

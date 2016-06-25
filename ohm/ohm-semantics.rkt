@@ -1,6 +1,8 @@
 #lang racket/base
 
-(provide parse-ohm)
+(provide read-ohm-grammars
+         read-ohm-grammar
+         parse-ohm-grammar)
 
 (require racket/match)
 (require (only-in racket/list flatten))
@@ -10,14 +12,33 @@
 (require "pexpr.rkt")
 (require "ohm-grammar.rkt")
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (read-ohm-grammar [p (current-input-port)]
+                          #:start-rule [start-rule 'Grammar]
+                          #:input-source-name [input-source-name #f])
+  (read/grammar ohm-grammar-grammar
+                p
+                #:input-source-name input-source-name
+                #:start-rule start-rule
+                #:on-success parse-ohm-grammar))
+
+(define (read-ohm-grammars [p (current-input-port)]
+                           #:input-source-name [input-source-name #f])
+  (read-ohm-grammar p
+                    #:start-rule 'Grammars
+                    #:input-source-name input-source-name))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (struct rule-def (kind rule) #:prefab)
 
-(define parse-ohm
+(define parse-ohm-grammar
   (ohm-semantics
    ()
 
    [(Grammars gs)
-    (for/hash [(g (parse-ohm gs))]
+    (for/hash [(g (parse-ohm-grammar gs))]
       (values (ohm-grammar-name g) g))]
 
    [(Grammar (#:text name) sg _ rules _)
@@ -26,7 +47,7 @@
                                 (define r (rule-def-rule e))
                                 (values (ohm-rule-name r) r)))
     (ohm-grammar (string->symbol name)
-                 (match (parse-ohm sg)
+                 (match (parse-ohm-grammar sg)
                    [(list sgname) (string->symbol sgname)]
                    [(list) #f])
                  (and (pair? parsed-rules) (ohm-rule-name (rule-def-rule (car parsed-rules))))
@@ -145,7 +166,7 @@
               (lambda (p)
                 (read/grammar #:input-source-name input-filename
                               ohm-grammar-grammar p))))
-  (define new-ohm-grammar-grammar (hash-ref (parse-ohm v) 'Ohm))
+  (define new-ohm-grammar-grammar (hash-ref (parse-ohm-grammar v) 'Ohm))
   ;; (pretty-print new-ohm-grammar-grammar)
 
   (define (check-rules old-rules new-rules)
@@ -167,4 +188,12 @@
      (check-rules old-exts new-exts)
      (check-rules old-overs new-overs)])
 
-  (check-equal? ohm-grammar-grammar new-ohm-grammar-grammar))
+  (check-equal? ohm-grammar-grammar new-ohm-grammar-grammar)
+
+  (check-exn #px"Parse error at :1\\.13 .* \":=\" in order to match rule Rule_override" ;; etc etc
+             (lambda ()
+               (read-ohm-grammar (open-input-string "Bogus { quux }"))))
+
+  ;; (read-ohm-grammar (open-input-string "Bogus { "))
+
+  )
