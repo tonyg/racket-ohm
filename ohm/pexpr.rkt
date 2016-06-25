@@ -25,7 +25,11 @@
 
          (struct-out pexpr-apply)
 
-         (struct-out pexpr-unicode-char))
+         (struct-out pexpr-unicode-char)
+
+         pexpr-arity)
+
+(require racket/match)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -53,3 +57,31 @@
 (struct pexpr-apply pexpr (rule-name arguments) #:transparent)
 
 (struct pexpr-unicode-char pexpr (category) #:transparent)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (pexpr-arity expr)
+  (match expr
+    [(? pexpr-any?) 1]
+    [(? pexpr-end?) 1]
+    [(? pexpr-prim?) 1]
+    [(? pexpr-range?) 1]
+    [(? pexpr-param?) 1] ;; TODO: bogus?!?!
+    [(pexpr-alt terms) (if (null? terms) 0 (pexpr-arity (car terms)))]
+    [(pexpr-seq factors) (foldl + 0 (map pexpr-arity factors))]
+    [(pexpr-star inner-expr) (pexpr-arity inner-expr)]
+    [(pexpr-plus inner-expr) (pexpr-arity inner-expr)]
+    [(pexpr-opt inner-expr) (pexpr-arity inner-expr)]
+    [(pexpr-not inner-expr) 0]
+    [(pexpr-lookahead inner-expr) (pexpr-arity inner-expr)]
+    [(pexpr-lex inner-expr) (pexpr-arity inner-expr)]
+    [(? pexpr-apply?) 1]
+    [(? pexpr-unicode-char?) 1]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(module+ test
+  (require rackunit)
+  (check-equal? (pexpr-arity (pexpr-seq (list (pexpr-not (pexpr-prim "\n"))
+                                              (pexpr-apply 'space '()))))
+                1))

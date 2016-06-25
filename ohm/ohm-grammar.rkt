@@ -3,7 +3,7 @@
 
 (provide proto-built-in-rules
          built-in-rules
-         ohm-grammar
+         ohm-grammar-grammar
          system-grammars)
 
 (require json)
@@ -18,12 +18,12 @@
 
 (define proto-built-in-rules (load-system-grammar "proto-built-in-rules.json"))
 (define built-in-rules (load-system-grammar "built-in-rules.json"))
-(define ohm-grammar (load-system-grammar "ohm-grammar.json"))
+(define ohm-grammar-grammar (load-system-grammar "ohm-grammar.json"))
 
 (define system-grammars
   (hash 'ProtoBuiltInRules proto-built-in-rules
         'BuiltInRules built-in-rules
-        'Ohm ohm-grammar))
+        'Ohm ohm-grammar-grammar))
 
 (module+ test
   (require racket/pretty)

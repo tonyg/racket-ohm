@@ -23,7 +23,9 @@
            start-rule
            rules)
      (define parsed-rules (for/list [((name j) (in-hash rules))] (jsexpr->rule name j)))
-     (define (rules-of-kind k) (for/list [(e parsed-rules) #:when (equal? (car e) k)] (cadr e)))
+     (define (rules-of-kind k) (for/hash [(e parsed-rules) #:when (equal? (car e) k)]
+                                 (define r (cadr e))
+                                 (values (ohm-rule-name r) r)))
      (ohm-grammar (string->symbol name)
                   (maybe string->symbol super-grammar-name)
                   (maybe string->symbol start-rule)
@@ -45,7 +47,7 @@
     (match j
       [(list "any" _meta-info) (pexpr-any)]
       [(list "end" _meta-info) (pexpr-end)]
-      [(list "terminal" _meta-info obj) (pexpr-prim obj)]
+      [(list "terminal" _meta-info (? string? obj)) (pexpr-prim obj)]
       [(list "range" _meta-info from to) (pexpr-range from to)]
       [(list "param" _meta-info index) (pexpr-param index)]
       [(list* "alt" _meta-info terms) (pexpr-alt (map walk terms))]
