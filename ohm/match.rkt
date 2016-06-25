@@ -3,6 +3,7 @@
 (require racket/match)
 (require racket/set)
 (require (only-in racket/list make-list))
+(require syntax/srcloc)
 
 (require "grammar.rkt")
 (require "ohm-grammar.rkt")
@@ -71,7 +72,7 @@
 (define (interval is0 [is1 (peek)])
   (define p0 (input-source-position is0))
   (define p1 (input-source-position is1))
-  (vector (current-input-source)
+  (vector (current-input-source-name)
           (position-line p0)
           (position-col p0)
           (position-offset p0)
@@ -81,7 +82,7 @@
   (define srcloc (interval is0 is1))
   (current-bindings (cons (syntax-property (datum->syntax #f v srcloc)
                                            'ohm-source
-                                           (input-source-take is0 (vector-ref srcloc 4)))
+                                           (input-source-take is0 (source-location-span srcloc)))
                           (current-bindings)))
   #t)
 
@@ -273,10 +274,12 @@
 (module+ main ;; TODO: main -> test
   (require racket/port)
   (require racket/pretty)
+  (define input-filename "es5.ohm")
   (define v (call-with-input-file
-              "es5.ohm"
+              input-filename
               (lambda (p)
-                (grammar-match ohm-grammar-grammar p))))
+                (grammar-match #:input-source-name input-filename
+                               ohm-grammar-grammar p))))
   (pretty-print (if (syntax? v)
                     (syntax->datum v)
                     v))
@@ -284,6 +287,8 @@
     (syntax-case v (Grammars)
       [(Grammars (g ...))
        (for [(x (syntax->list #'(g ...)))]
+         (display (source-location->string x))
+         (newline)
          (write (syntax-property x 'ohm-source))
          (newline)
          (newline))])))
