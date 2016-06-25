@@ -160,7 +160,10 @@
   (require racket/pretty)
   (require racket/set)
   (require rackunit)
-  (define input-filename "ohm-grammar.ohm")
+
+  (require racket/runtime-path)
+  (define-runtime-path ohm ".")
+  (define input-filename (build-path ohm "private/ohm-grammar.ohm"))
   (define v (call-with-input-file
               input-filename
               (lambda (p)

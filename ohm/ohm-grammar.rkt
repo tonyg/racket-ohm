@@ -16,9 +16,9 @@
 (define (load-system-grammar json-filename)
   (jsexpr->grammar (with-input-from-file (build-path ohm json-filename) read-json)))
 
-(define proto-built-in-rules (load-system-grammar "proto-built-in-rules.json"))
-(define built-in-rules (load-system-grammar "built-in-rules.json"))
-(define ohm-grammar-grammar (load-system-grammar "ohm-grammar.json"))
+(define proto-built-in-rules (load-system-grammar "private/proto-built-in-rules.json"))
+(define built-in-rules (load-system-grammar "private/built-in-rules.json"))
+(define ohm-grammar-grammar (load-system-grammar "private/ohm-grammar.json"))
 
 (define system-grammars
   (hash 'ProtoBuiltInRules proto-built-in-rules
