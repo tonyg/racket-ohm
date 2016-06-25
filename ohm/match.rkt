@@ -1,5 +1,8 @@
 #lang racket/base
 
+;; TODO: memoization of parsing
+;; TODO: left recursion
+
 (require racket/match)
 (require racket/set)
 (require (only-in racket/list make-list))
