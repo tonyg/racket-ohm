@@ -27,6 +27,8 @@
 
          (struct-out pexpr-unicode-char)
 
+         apply-if-many
+
          pexpr-arity
          pexpr-subst)
 
@@ -58,6 +60,11 @@
 (struct pexpr-apply pexpr (rule-name arguments) #:transparent)
 
 (struct pexpr-unicode-char pexpr (category) #:transparent)
+
+(define (apply-if-many ctor es)
+  (match es
+    [(list e) e]
+    [_ (ctor es)]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

@@ -2,10 +2,21 @@
 
 ;; TODO: left recursion
 
+(provide (struct-out meta-info)
+         (struct-out ohm-node)
+         (struct-out ohm-terminal)
+         (struct-out ohm-nonterminal)
+         ohm-node->s-expression
+         grammar-match
+         ohm-match
+         ohm-semantics)
+
 (require racket/match)
 (require racket/set)
 (require (only-in racket/list make-list))
 (require syntax/srcloc)
+
+(require (for-syntax racket/base))
 
 (require "grammar.rkt")
 (require "ohm-grammar.rkt")
@@ -15,9 +26,21 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(struct meta-info (source-name line col offset span source) #:prefab)
+(struct ohm-node (meta-info) #:prefab)
+(struct ohm-sequence ohm-node (items) #:prefab)
+(struct ohm-terminal ohm-node (value) #:prefab)
+(struct ohm-nonterminal ohm-node (rule-name children) #:prefab)
+
 (struct pos-info (pos [cache #:mutable]) #:transparent)
 
 (struct environment (inheritance-chain bindings) #:transparent)
+
+(define (ohm-node->s-expression n)
+  (match n
+    [(ohm-sequence _ ns) (map ohm-node->s-expression ns)]
+    [(ohm-terminal _ v) v]
+    [(ohm-nonterminal _ r ns) (cons r (map ohm-node->s-expression ns))]))
 
 (define current-input-source-name (make-parameter #f))
 (define current-input-source (make-parameter #f))
@@ -73,27 +96,32 @@
 (define (interval is0 [is1 (peek)])
   (define p0 (input-source-position is0))
   (define p1 (input-source-position is1))
-  (vector (current-input-source-name)
-          (position-line p0)
-          (position-col p0)
-          (position-offset p0)
-          (- (position-offset p1) (position-offset p0))))
+  (define span (- (position-offset p1) (position-offset p0)))
+  (meta-info (current-input-source-name)
+             (position-line p0)
+             (position-col p0)
+             (position-offset p0)
+             span
+             (input-source-take is0 span)))
 
-(define (succeed is0 v #:end-pos [is1 (peek)])
-  (define srcloc (interval is0 is1))
-  (current-bindings (cons (syntax-property (datum->syntax #f v srcloc)
-                                           'ohm-source
-                                           (input-source-take is0 (source-location-span srcloc)))
-                          (current-bindings)))
+(define (terminal is0 v #:end-pos [is1 (peek)])
+  (ohm-terminal (interval is0 is1) v))
+
+(define (nonterminal is0 rule-name children #:end-pos [is1 (peek)])
+  (ohm-nonterminal (interval is0 is1) rule-name children))
+
+(define (succeed n)
+  (current-bindings (cons n (current-bindings)))
   #t)
 
-(define (transpose-bindings expr rows)
+(define (transpose-bindings is0 expr rows #:end-pos [is1 (peek)])
+  (define mi (interval is0 is1))
   (if (null? rows)
-      (make-list (pexpr-arity expr) '())
-      (apply map list rows)))
+      (make-list (pexpr-arity expr) (ohm-sequence mi '()))
+      (apply map (lambda ns (ohm-sequence mi ns)) rows)))
 
-(define (succeed/transpose is expr rows)
-  (for [(v (transpose-bindings expr rows))] (succeed is v))
+(define (succeed/transpose is0 expr rows)
+  (for [(v (transpose-bindings is0 expr rows))] (succeed v))
   #t)
 
 (define (fail is expr)
@@ -150,15 +178,15 @@
      (advance! is)
      (if (input-source-at-eof? is)
          (fail is expr)
-         (succeed is (input-source-value is)))]
+         (succeed (terminal is (input-source-value is))))]
     [(pexpr-end)
      (if (input-source-at-eof? is)
-         (succeed is (void))
+         (succeed (terminal is (void)))
          (fail is expr))]
     [(pexpr-prim obj)
      (if (equal? (input-source-take is (string-length obj)) obj)
          (begin (poke! (input-source-drop is (string-length obj)))
-                (succeed is obj))
+                (succeed (terminal is obj)))
          (fail is expr))]
     [(pexpr-range from to)
      (advance! is)
@@ -167,7 +195,7 @@
          (let* ((ch (input-source-value is))
                 (s (string ch)))
            (if (and (string<=? from s) (string<=? s to))
-               (succeed is ch)
+               (succeed (terminal is ch))
                (fail is expr))))]
     [(pexpr-param index)
      (eval-pexpr* is
@@ -216,22 +244,21 @@
      (define actuals (for/vector [(e arguments)] (pexpr-subst (environment-bindings env) e)))
      (define application (list rule-name actuals))
      (define pi (pos-info-at (input-source-position is)))
-     (match-define (cons v next-is)
+     (match-define (cons children next-is)
        (hash-ref (pos-info-cache pi)
                  application
                  (lambda ()
-                   (define v
-                     (parameterize ((current-rule-name rule-name))
-                       (define r (eval-pexpr/bindings (environment (environment-inheritance-chain env)
-                                                                   actuals)
-                                                      (lookup-rule-body env rule-name)))
-                       (and r (cons (datum->syntax #f rule-name) r))))
-                   (define entry (cons v (peek)))
+                   (define entry
+                     (cons (parameterize ((current-rule-name rule-name))
+                             (eval-pexpr/bindings (environment (environment-inheritance-chain env)
+                                                               actuals)
+                                                  (lookup-rule-body env rule-name)))
+                           (peek)))
                    (set-pos-info-cache! pi (hash-set (pos-info-cache pi) application entry))
                    entry)))
-     (and v
-          (begin0 (succeed is v)
-            (poke! next-is)))]
+     (and children
+          (begin (poke! next-is)
+                 (succeed (nonterminal is rule-name children))))]
     [(pexpr-unicode-char category)
      (define rx
        (hash-ref unicode-categories category
@@ -241,7 +268,7 @@
          (fail is expr)
          (let ((ch (input-source-value is)))
            (if (regexp-match rx (string ch))
-               (succeed is ch)
+               (succeed (terminal is ch))
                (fail is expr))))]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -286,24 +313,41 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(module+ main ;; TODO: main -> test
-  (require racket/port)
-  (require racket/pretty)
-  (define input-filename "es5.ohm")
-  (define v (call-with-input-file
-              input-filename
-              (lambda (p)
-                (grammar-match #:input-source-name input-filename
-                               ohm-grammar-grammar p))))
-  (pretty-print (if (syntax? v)
-                    (syntax->datum v)
-                    v))
-  (when (syntax? v)
-    (syntax-case v (Grammars)
-      [(Grammars (g ...))
-       (for [(x (syntax->list #'(g ...)))]
-         (display (source-location->string x))
-         (newline)
-         (write (syntax-property x 'ohm-source))
-         (newline)
-         (newline))])))
+(begin-for-syntax
+  (define (compile-pat stx)
+    (syntax-case stx ()
+      [(#:text id)
+       #'(ohm-node (app meta-info-source id))]
+      [(#:terminal val)
+       #`(ohm-terminal _ val)]
+      [(#:node rule-name children)
+       #`(ohm-nonterminal _ rule-name children)]
+      [(#:seq ns)
+       #`(ohm-sequence _ ns)]
+      [(rule-name #:meta id kid ...)
+       #`(ohm-nonterminal id 'rule-name (list #,@(map compile-pat (syntax->list #'(kid ...)))))]
+      [(rule-name kid ...)
+       #`(ohm-nonterminal _ 'rule-name (list #,@(map compile-pat (syntax->list #'(kid ...)))))]
+      [id
+       (identifier? #'id)
+       #'id])))
+
+(define-syntax (ohm-match stx)
+  (syntax-case stx ()
+    [(_ n [node-pat body ...] ...)
+     #`(let loop ((n n))
+         (match n
+           #,@(map (lambda (clause)
+                     (syntax-case clause ()
+                       [(node-pat body ...)
+                        #`[#,(compile-pat #'node-pat) #:when (ohm-node? n) body ...]]))
+                   (syntax->list #'((node-pat body ...) ...)))
+           [(ohm-nonterminal _ _ (list inner)) (loop inner)]
+           [(ohm-sequence _ ns) (map loop ns)]
+           [(? list? ns) (map loop ns)]))]))
+
+(define-syntax (ohm-semantics stx)
+  (syntax-case stx ()
+    [(_ (extra-argument ...) [node-pat body ...] ...)
+     #`(lambda (n extra-argument ...)
+         (ohm-match n [node-pat body ...] ...))]))

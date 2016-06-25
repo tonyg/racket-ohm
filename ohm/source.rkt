@@ -54,7 +54,6 @@
     (define-values (line col offset) (port-next-location port))
     (define pos (position offset line col))
     (define val (read-char port))
-    (printf ".~a" val)
     (set-input-source-value*! s val)
     (set-input-source-position*! s pos)
     (set-input-source-next*! s (if (eof-object? val)
