@@ -1,6 +1,5 @@
 #lang racket/base
 
-;; TODO: memoization of parsing
 ;; TODO: left recursion
 
 (require racket/match)
@@ -16,10 +15,9 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(struct pos-info (pos) #:transparent)
+(struct pos-info (pos [cache #:mutable]) #:transparent)
 
 (struct environment (inheritance-chain bindings) #:transparent)
-(struct closure (env expr) #:transparent)
 
 (define current-input-source-name (make-parameter #f))
 (define current-input-source (make-parameter #f))
@@ -34,7 +32,7 @@
   (hash-ref (current-memo-table)
             pos
             (lambda ()
-              (define i (pos-info pos))
+              (define i (pos-info pos (hash)))
               (current-memo-table (hash-set (current-memo-table) pos i))
               i)))
 
@@ -172,8 +170,9 @@
                (succeed is ch)
                (fail is expr))))]
     [(pexpr-param index)
-     (define c (vector-ref (environment-bindings env) index))
-     (eval-pexpr (closure-env c) (closure-expr c))]
+     (eval-pexpr* is
+                  (environment (environment-inheritance-chain env) '#())
+                  (vector-ref (environment-bindings env) index))]
     [(pexpr-alt terms)
      (define saved-bindings (current-bindings))
      (let loop ((terms terms))
@@ -214,12 +213,25 @@
      (parameterize ((in-lexified-context? #t))
        (eval-pexpr env inner-expr))]
     [(pexpr-apply rule-name arguments)
-     (parameterize ((current-rule-name rule-name))
-       (define r (eval-pexpr/bindings (environment (environment-inheritance-chain env)
-                                                   (for/vector [(arg-expr arguments)]
-                                                     (closure env arg-expr)))
-                                      (lookup-rule-body env rule-name)))
-       (and r (succeed is (cons (datum->syntax #f rule-name) r))))]
+     (define actuals (for/vector [(e arguments)] (pexpr-subst (environment-bindings env) e)))
+     (define application (list rule-name actuals))
+     (define pi (pos-info-at (input-source-position is)))
+     (match-define (cons v next-is)
+       (hash-ref (pos-info-cache pi)
+                 application
+                 (lambda ()
+                   (define v
+                     (parameterize ((current-rule-name rule-name))
+                       (define r (eval-pexpr/bindings (environment (environment-inheritance-chain env)
+                                                                   actuals)
+                                                      (lookup-rule-body env rule-name)))
+                       (and r (cons (datum->syntax #f rule-name) r))))
+                   (define entry (cons v (peek)))
+                   (set-pos-info-cache! pi (hash-set (pos-info-cache pi) application entry))
+                   entry)))
+     (and v
+          (begin0 (succeed is v)
+            (poke! next-is)))]
     [(pexpr-unicode-char category)
      (define rx
        (hash-ref unicode-categories category

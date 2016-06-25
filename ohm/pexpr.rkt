@@ -27,7 +27,8 @@
 
          (struct-out pexpr-unicode-char)
 
-         pexpr-arity)
+         pexpr-arity
+         pexpr-subst)
 
 (require racket/match)
 
@@ -77,6 +78,21 @@
     [(pexpr-lex inner-expr) (pexpr-arity inner-expr)]
     [(? pexpr-apply?) 1]
     [(? pexpr-unicode-char?) 1]))
+
+(define (pexpr-subst env expr)
+  (let walk ((expr expr))
+    (match expr
+      [(pexpr-param index) (vector-ref env index)]
+      [(pexpr-alt terms) (pexpr-alt (map walk terms))]
+      [(pexpr-seq factors) (pexpr-seq (map walk factors))]
+      [(pexpr-star inner-expr) (pexpr-star (walk inner-expr))]
+      [(pexpr-plus inner-expr) (pexpr-plus (walk inner-expr))]
+      [(pexpr-opt inner-expr) (pexpr-opt (walk inner-expr))]
+      [(pexpr-not inner-expr) (pexpr-not (walk inner-expr))]
+      [(pexpr-lookahead inner-expr) (pexpr-lookahead (walk inner-expr))]
+      [(pexpr-lex inner-expr) (pexpr-lex (walk inner-expr))]
+      [(pexpr-apply rule-name arguments) (pexpr-apply rule-name (map walk arguments))]
+      [_ expr])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
