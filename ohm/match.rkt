@@ -8,10 +8,13 @@
          (struct-out ohm-nonterminal)
          (struct-out exn:fail:read:ohm)
          (struct-out failing-pexpr)
+         meta-info->position
          ohm-node->s-expression
          read/grammar
          ohm-match
-         ohm-semantics)
+         ohm-semantics
+         suppress-failures-in-nested-lexical-rules
+         trace-grammar-execution)
 
 (require racket/match)
 (require racket/set)
@@ -47,6 +50,9 @@
     [(ohm-sequence _ ns) (map ohm-node->s-expression ns)]
     [(ohm-terminal _ v) v]
     [(ohm-nonterminal _ r ns) (cons r (map ohm-node->s-expression ns))]))
+
+(define suppress-failures-in-nested-lexical-rules (make-parameter #t))
+(define trace-grammar-execution (make-parameter #f))
 
 (define current-input-source-name (make-parameter #f))
 (define current-input-source (make-parameter #f))
@@ -110,6 +116,11 @@
              (position-offset p0)
              span
              (input-source-take is0 span)))
+
+(define (meta-info->position mi)
+  (position (meta-info-offset mi)
+            (meta-info-line mi)
+            (meta-info-col mi)))
 
 (define (terminal is0 v #:end-pos [is1 (peek)])
   (ohm-terminal (interval is0 is1) v))
@@ -183,6 +194,7 @@
   (eval-pexpr* is1 env expr))
 
 (define (eval-pexpr* is env expr)
+  (when (trace-grammar-execution) ((trace-grammar-execution) is env expr))
   (match expr
     [(pexpr-any)
      (advance! is)
@@ -259,12 +271,14 @@
                  application
                  (lambda ()
                    (define entry
-                     (cons (parameterize ((current-rule-name rule-name)
-                                          (current-rule-name-for-failures
-                                           (if (or (not (current-rule-name-for-failures))
-                                                   (in-syntactic-context?))
-                                               rule-name
-                                               (current-rule-name-for-failures))))
+                     (cons (parameterize
+                               ((current-rule-name rule-name)
+                                (current-rule-name-for-failures
+                                 (if (or (not (current-rule-name-for-failures))
+                                         (in-syntactic-context?)
+                                         (not (suppress-failures-in-nested-lexical-rules)))
+                                     rule-name
+                                     (current-rule-name-for-failures))))
                              (eval-pexpr/bindings (environment (environment-inheritance-chain env)
                                                                actuals)
                                                   (lookup-rule-body env rule-name)))
@@ -393,15 +407,29 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define (optional-node->node-or-false n)
+  (match (ohm-sequence-items n)
+    ['() #f]
+    [(list n*) n*]))
+
 (begin-for-syntax
   (define (compile-pat stx)
-    (syntax-case stx ()
+    (syntax-case stx (and)
+      [(and p ...)
+       #`(and #,@(map compile-pat (syntax->list #'(p ...))))]
       [(#:text id)
        #'(ohm-node (app meta-info-source id))]
+      [(#:meta id)
+       #'(ohm-node id)]
       [(#:terminal val)
        #`(ohm-terminal _ val)]
+      [(#:node meta-info rule-name children)
+       #`(ohm-nonterminal meta-info rule-name children)]
       [(#:node rule-name children)
        #`(ohm-nonterminal _ rule-name children)]
+      [(#:opt n)
+       #`(app optional-node->node-or-false #,(compile-pat #'n))]
+      [#f #f] ;; for missing optionals
       [(#:seq ns)
        #`(ohm-sequence _ ns)]
       [(rule-name #:meta id kid ...)
