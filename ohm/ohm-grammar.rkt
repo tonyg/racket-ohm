@@ -25,6 +25,6 @@
         'BuiltInRules built-in-rules
         'Ohm ohm-grammar-grammar))
 
-(module+ test
-  (require racket/pretty)
-  (pretty-print system-grammars))
+;; (module+ test
+;;   (require racket/pretty)
+;;   (pretty-print system-grammars))
