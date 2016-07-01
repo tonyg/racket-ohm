@@ -381,29 +381,30 @@
                       #:input-source-name [input-source-name #f]
                       #:start-rule [start-rule (ohm-grammar-default-start-rule g)]
                       #:grammars [grammars (hash)]
-                      #:on-success [ks values]
+                      #:on-success [ks (lambda (result final-input-source) result)]
                       #:on-failure [kf raise])
   (define source
     (cond
       [(port? source0) (port->input-source source0)]
       [(input-source? source0) source0]
       [else (error 'read/grammar "Expected port or input-source; got ~v" source0)]))
-  (define r
+  (define-values (r final-input-source)
     (parameterize ((current-input-source-name input-source-name)
                    (current-input-source (box source))
                    (in-lexified-context? #f)
                    (current-memo-table (hash)))
       (define env (environment (build-inheritance-chain g grammars) '#()))
       (with-restored-failure-info
-        (or (eval-pexpr/bindings env (pexpr-apply start-rule '()))
-            (build-exn:fail:read:ohm (current-input-source-name)
-                                     (ohm-grammar-name g)
-                                     start-rule
-                                     (current-rightmost-failure-position)
-                                     (current-rightmost-failing-pexprs))))))
+        (values (or (eval-pexpr/bindings env (pexpr-apply start-rule '()))
+                    (build-exn:fail:read:ohm (current-input-source-name)
+                                             (ohm-grammar-name g)
+                                             start-rule
+                                             (current-rightmost-failure-position)
+                                             (current-rightmost-failing-pexprs)))
+                (peek)))))
   (if (exn:fail:read:ohm? r)
       (kf r)
-      (ks (car r))))
+      (ks (car r) final-input-source)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

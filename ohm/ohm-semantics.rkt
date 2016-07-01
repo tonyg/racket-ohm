@@ -21,7 +21,7 @@
                 p
                 #:input-source-name input-source-name
                 #:start-rule start-rule
-                #:on-success parse-ohm-grammar))
+                #:on-success (lambda (r is) (parse-ohm-grammar r))))
 
 (define (read-ohm-grammars [p (current-input-port)]
                            #:input-source-name [input-source-name #f])
