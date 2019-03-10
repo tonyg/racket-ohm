@@ -176,23 +176,23 @@
   (define (check-rules old-rules new-rules)
     (define missing-from-old (set-subtract (hash-keys new-rules) (hash-keys old-rules)))
     (define missing-from-new (set-subtract (hash-keys old-rules) (hash-keys new-rules)))
-    (check-equal? missing-from-old '())
-    (check-equal? missing-from-new '())
+    (check-equal? '() missing-from-old)
+    (check-equal? '() missing-from-new)
     (for [((name old-rule) (in-hash old-rules))]
       (define new-rule (hash-ref new-rules name))
-      (check-equal? old-rule new-rule)))
+      (check-equal? new-rule old-rule)))
 
   (match* (ohm-grammar-grammar new-ohm-grammar-grammar)
     [((ohm-grammar old-name old-super old-start old-defs old-exts old-overs)
       (ohm-grammar new-name new-super new-start new-defs new-exts new-overs))
-     (check-equal? old-name new-name)
-     (check-equal? old-super new-super)
-     (check-equal? old-start new-start)
+     (check-equal? new-name old-name)
+     (check-equal? new-super old-super)
+     (check-equal? new-start old-start)
      (check-rules old-defs new-defs)
      (check-rules old-exts new-exts)
      (check-rules old-overs new-overs)])
 
-  (check-equal? ohm-grammar-grammar new-ohm-grammar-grammar)
+  (check-equal? new-ohm-grammar-grammar ohm-grammar-grammar)
 
   (check-exn #px"Parse error at :1\\.13 .* \":=\" in order to match rule Rule_override" ;; etc etc
              (lambda ()
