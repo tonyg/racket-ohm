@@ -1,196 +1,144 @@
 [
    "grammar",
    {
-      "source" : "Ohm {\n\n  Grammars\n    = Grammar*\n\n  Grammar\n    = ident SuperGrammar? \"{\" Rule* \"}\"\n\n  SuperGrammar\n    = \"<:\" ident\n\n  Rule\n    = ident Formals? ruleDescr? \"=\"  RuleBody  -- define\n    | ident Formals?            \":=\" RuleBody  -- override\n    | ident Formals?            \"+=\" RuleBody  -- extend\n\n  RuleBody\n    = \"|\"? TopLevelTerm (\"|\" TopLevelTerm)*\n\n  TopLevelTerm\n    = Seq caseName  -- inline\n    | Seq\n\n  Formals\n    = \"<\" ListOf<ident, \",\"> \">\"\n\n  Params\n    = \"<\" ListOf<Seq, \",\"> \">\"\n\n  Alt\n    = Seq (\"|\" Seq)*\n\n  Seq\n    = Iter*\n\n  Iter\n    = Pred \"*\"  -- star\n    | Pred \"+\"  -- plus\n    | Pred \"?\"  -- opt\n    | Pred\n\n  Pred\n    = \"~\" Lex  -- not\n    | \"&\" Lex  -- lookahead\n    | Lex\n\n  Lex\n    = \"#\" Base  -- lex\n    | Base\n\n  Base\n    = ident Params? ~(ruleDescr? \"=\" | \":=\" | \"+=\")  -- application\n    | terminal \"..\" terminal                         -- range\n    | terminal                                       -- terminal\n    | \"(\" Alt \")\"                                    -- paren\n\n  ruleDescr  (a rule description)\n    = \"(\" ruleDescrText \")\"\n\n  ruleDescrText\n    = (~\")\" any)*\n\n  caseName\n    = \"--\" (~\"\\n\" space)* name (~\"\\n\" space)* (\"\\n\" | &\"}\")\n\n  name  (a name)\n    = nameFirst nameRest*\n\n  nameFirst\n    = \"_\"\n    | letter\n\n  nameRest\n    = \"_\"\n    | alnum\n\n  ident  (an identifier)\n    = name\n\n  terminal\n    = \"\\\"\" terminalChar* \"\\\"\"\n\n  terminalChar\n    = escapeChar\n    | ~\"\\\\\" ~\"\\\"\" ~\"\\n\" any\n\n  escapeChar  (an escape sequence)\n    = \"\\\\\\\\\"                                     -- backslash\n    | \"\\\\\\\"\"                                     -- doubleQuote\n    | \"\\\\\\'\"                                     -- singleQuote\n    | \"\\\\b\"                                      -- backspace\n    | \"\\\\n\"                                      -- lineFeed\n    | \"\\\\r\"                                      -- carriageReturn\n    | \"\\\\t\"                                      -- tab\n    | \"\\\\u\" hexDigit hexDigit hexDigit hexDigit  -- unicodeEscape\n    | \"\\\\x\" hexDigit hexDigit                    -- hexEscape\n\n  space\n   += comment\n\n  comment\n    = \"//\" (~\"\\n\" any)* \"\\n\"  -- singleLine\n    | \"/*\" (~\"*/\" any)* \"*/\"  -- multiLine\n\n  tokens = token*\n\n  token = caseName | comment | ident | operator | punctuation | terminal | any\n\n  operator = \"<:\" | \"=\" | \":=\" | \"+=\" | \"*\" | \"+\" | \"?\" | \"~\" | \"&\"\n\n  punctuation = \"<\" | \">\" | \",\" | \"--\"\n}"
+      "source" : "Ohm {\n\n  Grammars\n    = Grammar*\n\n  Grammar\n    = ident SuperGrammar? \"{\" Rule* \"}\"\n\n  SuperGrammar\n    = \"<:\" ident\n\n  Rule\n    = ident Formals? ruleDescr? \"=\"  RuleBody  -- define\n    | ident Formals?            \":=\" RuleBody  -- override\n    | ident Formals?            \"+=\" RuleBody  -- extend\n\n  RuleBody\n    = \"|\"? NonemptyListOf<TopLevelTerm, \"|\">\n\n  TopLevelTerm\n    = Seq caseName  -- inline\n    | Seq\n\n  Formals\n    = \"<\" ListOf<ident, \",\"> \">\"\n\n  Params\n    = \"<\" ListOf<Seq, \",\"> \">\"\n\n  Alt\n    = NonemptyListOf<Seq, \"|\">\n\n  Seq\n    = Iter*\n\n  Iter\n    = Pred \"*\"  -- star\n    | Pred \"+\"  -- plus\n    | Pred \"?\"  -- opt\n    | Pred\n\n  Pred\n    = \"~\" Lex  -- not\n    | \"&\" Lex  -- lookahead\n    | Lex\n\n  Lex\n    = \"#\" Base  -- lex\n    | Base\n\n  Base\n    = ident Params? ~(ruleDescr? \"=\" | \":=\" | \"+=\")  -- application\n    | oneCharTerminal \"..\" oneCharTerminal           -- range\n    | terminal                                       -- terminal\n    | \"(\" Alt \")\"                                    -- paren\n\n  ruleDescr  (a rule description)\n    = \"(\" ruleDescrText \")\"\n\n  ruleDescrText\n    = (~\")\" any)*\n\n  caseName\n    = \"--\" (~\"\\n\" space)* name (~\"\\n\" space)* (\"\\n\" | &\"}\")\n\n  name  (a name)\n    = nameFirst nameRest*\n\n  nameFirst\n    = \"_\"\n    | letter\n\n  nameRest\n    = \"_\"\n    | alnum\n\n  ident  (an identifier)\n    = name\n\n  terminal\n    = \"\\\"\" terminalChar* \"\\\"\"\n\n  oneCharTerminal\n    = \"\\\"\" terminalChar \"\\\"\"\n\n  terminalChar\n    = escapeChar\n    | ~\"\\\\\" ~\"\\\"\" ~\"\\n\" any\n\n  escapeChar  (an escape sequence)\n    = \"\\\\\\\\\"                                     -- backslash\n    | \"\\\\\\\"\"                                     -- doubleQuote\n    | \"\\\\\\'\"                                     -- singleQuote\n    | \"\\\\b\"                                      -- backspace\n    | \"\\\\n\"                                      -- lineFeed\n    | \"\\\\r\"                                      -- carriageReturn\n    | \"\\\\t\"                                      -- tab\n    | \"\\\\u\" hexDigit hexDigit hexDigit hexDigit  -- unicodeEscape\n    | \"\\\\x\" hexDigit hexDigit                    -- hexEscape\n\n  space\n   += comment\n\n  comment\n    = \"//\" (~\"\\n\" any)* \"\\n\"  -- singleLine\n    | \"/*\" (~\"*/\" any)* \"*/\"  -- multiLine\n\n  tokens = token*\n\n  token = caseName | comment | ident | operator | punctuation | terminal | any\n\n  operator = \"<:\" | \"=\" | \":=\" | \"+=\" | \"*\" | \"+\" | \"?\" | \"~\" | \"&\"\n\n  punctuation = \"<\" | \">\" | \",\" | \"--\"\n}"
    },
    "Ohm",
    null,
    "Grammars",
    {
-      "escapeChar_lineFeed" : [
+      "terminalChar" : [
          "define",
-         {},
-         null,
-         [],
-         [
-            "terminal",
-            {
-               "sourceInterval" : [
-                  1724,
-                  1729
-               ]
-            },
-            "\\n"
-         ]
-      ],
-      "name" : [
-         "define",
-         {},
-         "a name",
-         [],
-         [
-            "seq",
-            {
-               "sourceInterval" : [
-                  1200,
-                  1219
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1200,
-                     1209
-                  ]
-               },
-               "nameFirst",
-               []
-            ],
-            [
-               "star",
-               {
-                  "sourceInterval" : [
-                     1210,
-                     1219
-                  ]
-               },
-               [
-                  "app",
-                  {
-                     "sourceInterval" : [
-                        1210,
-                        1218
-                     ]
-                  },
-                  "nameRest",
-                  []
-               ]
+         {
+            "sourceInterval" : [
+               1431,
+               1488
             ]
-         ]
-      ],
-      "Base_terminal" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "app",
-            {
-               "sourceInterval" : [
-                  885,
-                  893
-               ]
-            },
-            "terminal",
-            []
-         ]
-      ],
-      "Grammar" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "seq",
-            {
-               "sourceInterval" : [
-                  50,
-                  83
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     50,
-                     55
-                  ]
-               },
-               "ident",
-               []
-            ],
-            [
-               "opt",
-               {
-                  "sourceInterval" : [
-                     56,
-                     69
-                  ]
-               },
-               [
-                  "app",
-                  {
-                     "sourceInterval" : [
-                        56,
-                        68
-                     ]
-                  },
-                  "SuperGrammar",
-                  []
-               ]
-            ],
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     70,
-                     73
-                  ]
-               },
-               "{"
-            ],
-            [
-               "star",
-               {
-                  "sourceInterval" : [
-                     74,
-                     79
-                  ]
-               },
-               [
-                  "app",
-                  {
-                     "sourceInterval" : [
-                        74,
-                        78
-                     ]
-                  },
-                  "Rule",
-                  []
-               ]
-            ],
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     80,
-                     83
-                  ]
-               },
-               "}"
-            ]
-         ]
-      ],
-      "operator" : [
-         "define",
-         {},
+         },
          null,
          [],
          [
             "alt",
             {
                "sourceInterval" : [
-                  2264,
-                  2318
+                  1450,
+                  1488
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1450,
+                     1460
+                  ]
+               },
+               "escapeChar",
+               []
+            ],
+            [
+               "seq",
+               {
+                  "sourceInterval" : [
+                     1467,
+                     1488
+                  ]
+               },
+               [
+                  "not",
+                  {
+                     "sourceInterval" : [
+                        1467,
+                        1472
+                     ]
+                  },
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           1468,
+                           1472
+                        ]
+                     },
+                     "\\"
+                  ]
+               ],
+               [
+                  "not",
+                  {
+                     "sourceInterval" : [
+                        1473,
+                        1478
+                     ]
+                  },
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           1474,
+                           1478
+                        ]
+                     },
+                     "\""
+                  ]
+               ],
+               [
+                  "not",
+                  {
+                     "sourceInterval" : [
+                        1479,
+                        1484
+                     ]
+                  },
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           1480,
+                           1484
+                        ]
+                     },
+                     "\n"
+                  ]
+               ],
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        1485,
+                        1488
+                     ]
+                  },
+                  "any",
+                  []
+               ]
+            ]
+         ]
+      ],
+      "operator" : [
+         "define",
+         {
+            "sourceInterval" : [
+               2312,
+               2377
+            ]
+         },
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  2323,
+                  2377
                ]
             },
             [
                "terminal",
                {
                   "sourceInterval" : [
-                     2264,
-                     2268
+                     2323,
+                     2327
                   ]
                },
                "<:"
@@ -199,8 +147,8 @@
                "terminal",
                {
                   "sourceInterval" : [
-                     2271,
-                     2274
+                     2330,
+                     2333
                   ]
                },
                "="
@@ -209,8 +157,8 @@
                "terminal",
                {
                   "sourceInterval" : [
-                     2277,
-                     2281
+                     2336,
+                     2340
                   ]
                },
                ":="
@@ -219,8 +167,8 @@
                "terminal",
                {
                   "sourceInterval" : [
-                     2284,
-                     2288
+                     2343,
+                     2347
                   ]
                },
                "+="
@@ -229,8 +177,8 @@
                "terminal",
                {
                   "sourceInterval" : [
-                     2291,
-                     2294
+                     2350,
+                     2353
                   ]
                },
                "*"
@@ -239,8 +187,8 @@
                "terminal",
                {
                   "sourceInterval" : [
-                     2297,
-                     2300
+                     2356,
+                     2359
                   ]
                },
                "+"
@@ -249,8 +197,8 @@
                "terminal",
                {
                   "sourceInterval" : [
-                     2303,
-                     2306
+                     2362,
+                     2365
                   ]
                },
                "?"
@@ -259,8 +207,8 @@
                "terminal",
                {
                   "sourceInterval" : [
-                     2309,
-                     2312
+                     2368,
+                     2371
                   ]
                },
                "~"
@@ -269,680 +217,63 @@
                "terminal",
                {
                   "sourceInterval" : [
-                     2315,
-                     2318
+                     2374,
+                     2377
                   ]
                },
                "&"
             ]
          ]
       ],
-      "Base_range" : [
+      "SuperGrammar" : [
          "define",
-         {},
-         null,
-         [],
-         [
-            "seq",
-            {
-               "sourceInterval" : [
-                  823,
-                  845
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     823,
-                     831
-                  ]
-               },
-               "terminal",
-               []
-            ],
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     832,
-                     836
-                  ]
-               },
-               ".."
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     837,
-                     845
-                  ]
-               },
-               "terminal",
-               []
+         {
+            "sourceInterval" : [
+               87,
+               116
             ]
-         ]
-      ],
-      "Iter_star" : [
-         "define",
-         {},
+         },
          null,
          [],
          [
             "seq",
             {
                "sourceInterval" : [
-                  556,
-                  564
+                  106,
+                  116
                ]
             },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     556,
-                     560
-                  ]
-               },
-               "Pred",
-               []
-            ],
             [
                "terminal",
                {
                   "sourceInterval" : [
-                     561,
-                     564
+                     106,
+                     110
                   ]
                },
-               "*"
-            ]
-         ]
-      ],
-      "Base_application" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "seq",
-            {
-               "sourceInterval" : [
-                  755,
-                  800
-               ]
-            },
+               "<:"
+            ],
             [
                "app",
                {
                   "sourceInterval" : [
-                     755,
-                     760
+                     111,
+                     116
                   ]
                },
                "ident",
-               []
-            ],
-            [
-               "opt",
-               {
-                  "sourceInterval" : [
-                     761,
-                     768
-                  ]
-               },
-               [
-                  "app",
-                  {
-                     "sourceInterval" : [
-                        761,
-                        767
-                     ]
-                  },
-                  "Params",
-                  []
-               ]
-            ],
-            [
-               "not",
-               {
-                  "sourceInterval" : [
-                     769,
-                     800
-                  ]
-               },
-               [
-                  "alt",
-                  {
-                     "sourceInterval" : [
-                        771,
-                        799
-                     ]
-                  },
-                  [
-                     "seq",
-                     {
-                        "sourceInterval" : [
-                           771,
-                           785
-                        ]
-                     },
-                     [
-                        "opt",
-                        {
-                           "sourceInterval" : [
-                              771,
-                              781
-                           ]
-                        },
-                        [
-                           "app",
-                           {
-                              "sourceInterval" : [
-                                 771,
-                                 780
-                              ]
-                           },
-                           "ruleDescr",
-                           []
-                        ]
-                     ],
-                     [
-                        "terminal",
-                        {
-                           "sourceInterval" : [
-                              782,
-                              785
-                           ]
-                        },
-                        "="
-                     ]
-                  ],
-                  [
-                     "terminal",
-                     {
-                        "sourceInterval" : [
-                           788,
-                           792
-                        ]
-                     },
-                     ":="
-                  ],
-                  [
-                     "terminal",
-                     {
-                        "sourceInterval" : [
-                           795,
-                           799
-                        ]
-                     },
-                     "+="
-                  ]
-               ]
-            ]
-         ]
-      ],
-      "Params" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "seq",
-            {
-               "sourceInterval" : [
-                  470,
-                  494
-               ]
-            },
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     470,
-                     473
-                  ]
-               },
-               "<"
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     474,
-                     490
-                  ]
-               },
-               "ListOf",
-               [
-                  [
-                     "app",
-                     {
-                        "sourceInterval" : [
-                           481,
-                           484
-                        ]
-                     },
-                     "Seq",
-                     []
-                  ],
-                  [
-                     "terminal",
-                     {
-                        "sourceInterval" : [
-                           486,
-                           489
-                        ]
-                     },
-                     ","
-                  ]
-               ]
-            ],
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     491,
-                     494
-                  ]
-               },
-               ">"
-            ]
-         ]
-      ],
-      "comment_multiLine" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "seq",
-            {
-               "sourceInterval" : [
-                  2114,
-                  2136
-               ]
-            },
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     2114,
-                     2118
-                  ]
-               },
-               "/*"
-            ],
-            [
-               "star",
-               {
-                  "sourceInterval" : [
-                     2119,
-                     2131
-                  ]
-               },
-               [
-                  "seq",
-                  {
-                     "sourceInterval" : [
-                        2120,
-                        2129
-                     ]
-                  },
-                  [
-                     "not",
-                     {
-                        "sourceInterval" : [
-                           2120,
-                           2125
-                        ]
-                     },
-                     [
-                        "terminal",
-                        {
-                           "sourceInterval" : [
-                              2121,
-                              2125
-                           ]
-                        },
-                        "*/"
-                     ]
-                  ],
-                  [
-                     "app",
-                     {
-                        "sourceInterval" : [
-                           2126,
-                           2129
-                        ]
-                     },
-                     "any",
-                     []
-                  ]
-               ]
-            ],
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     2132,
-                     2136
-                  ]
-               },
-               "*/"
-            ]
-         ]
-      ],
-      "Pred_not" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "seq",
-            {
-               "sourceInterval" : [
-                  646,
-                  653
-               ]
-            },
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     646,
-                     649
-                  ]
-               },
-               "~"
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     650,
-                     653
-                  ]
-               },
-               "Lex",
-               []
-            ]
-         ]
-      ],
-      "space" : [
-         "extend",
-         {},
-         null,
-         [],
-         [
-            "app",
-            {
-               "sourceInterval" : [
-                  2045,
-                  2052
-               ]
-            },
-            "comment",
-            []
-         ]
-      ],
-      "nameRest" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "alt",
-            {
-               "sourceInterval" : [
-                  1274,
-                  1289
-               ]
-            },
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     1274,
-                     1277
-                  ]
-               },
-               "_"
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1284,
-                     1289
-                  ]
-               },
-               "alnum",
-               []
-            ]
-         ]
-      ],
-      "Iter_plus" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "seq",
-            {
-               "sourceInterval" : [
-                  580,
-                  588
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     580,
-                     584
-                  ]
-               },
-               "Pred",
-               []
-            ],
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     585,
-                     588
-                  ]
-               },
-               "+"
-            ]
-         ]
-      ],
-      "escapeChar" : [
-         "define",
-         {},
-         "an escape sequence",
-         [],
-         [
-            "alt",
-            {
-               "sourceInterval" : [
-                  1472,
-                  2029
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1472,
-                     1478
-                  ]
-               },
-               "escapeChar_backslash",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1534,
-                     1540
-                  ]
-               },
-               "escapeChar_doubleQuote",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1598,
-                     1604
-                  ]
-               },
-               "escapeChar_singleQuote",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1662,
-                     1667
-                  ]
-               },
-               "escapeChar_backspace",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1724,
-                     1729
-                  ]
-               },
-               "escapeChar_lineFeed",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1785,
-                     1790
-                  ]
-               },
-               "escapeChar_carriageReturn",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1852,
-                     1857
-                  ]
-               },
-               "escapeChar_tab",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1908,
-                     1949
-                  ]
-               },
-               "escapeChar_unicodeEscape",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1974,
-                     1997
-                  ]
-               },
-               "escapeChar_hexEscape",
-               []
-            ]
-         ]
-      ],
-      "Rule_override" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "seq",
-            {
-               "sourceInterval" : [
-                  188,
-                  227
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     188,
-                     193
-                  ]
-               },
-               "ident",
-               []
-            ],
-            [
-               "opt",
-               {
-                  "sourceInterval" : [
-                     194,
-                     202
-                  ]
-               },
-               [
-                  "app",
-                  {
-                     "sourceInterval" : [
-                        194,
-                        201
-                     ]
-                  },
-                  "Formals",
-                  []
-               ]
-            ],
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     214,
-                     218
-                  ]
-               },
-               ":="
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     219,
-                     227
-                  ]
-               },
-               "RuleBody",
                []
             ]
          ]
       ],
       "Rule_define" : [
          "define",
-         {},
+         {
+            "sourceInterval" : [
+               131,
+               181
+            ]
+         },
          null,
          [],
          [
@@ -1027,61 +358,186 @@
             ]
          ]
       ],
-      "SuperGrammar" : [
+      "space" : [
+         "extend",
+         {
+            "sourceInterval" : [
+               2092,
+               2111
+            ]
+         },
+         null,
+         [],
+         [
+            "app",
+            {
+               "sourceInterval" : [
+                  2104,
+                  2111
+               ]
+            },
+            "comment",
+            []
+         ]
+      ],
+      "Iter_plus" : [
          "define",
-         {},
+         {
+            "sourceInterval" : [
+               591,
+               608
+            ]
+         },
          null,
          [],
          [
             "seq",
             {
                "sourceInterval" : [
-                  106,
-                  116
+                  591,
+                  599
                ]
             },
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     106,
-                     110
-                  ]
-               },
-               "<:"
-            ],
             [
                "app",
                {
                   "sourceInterval" : [
-                     111,
-                     116
+                     591,
+                     595
                   ]
                },
-               "ident",
+               "Pred",
                []
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     596,
+                     599
+                  ]
+               },
+               "+"
             ]
          ]
       ],
-      "Lex" : [
+      "TopLevelTerm" : [
          "define",
-         {},
+         {
+            "sourceInterval" : [
+               358,
+               410
+            ]
+         },
          null,
          [],
          [
             "alt",
             {
                "sourceInterval" : [
-                  713,
-                  740
+                  377,
+                  410
                ]
             },
             [
                "app",
                {
                   "sourceInterval" : [
-                     713,
-                     721
+                     377,
+                     389
+                  ]
+               },
+               "TopLevelTerm_inline",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     407,
+                     410
+                  ]
+               },
+               "Seq",
+               []
+            ]
+         ]
+      ],
+      "Base_paren" : [
+         "define",
+         {
+            "sourceInterval" : [
+               961,
+               1016
+            ]
+         },
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  961,
+                  972
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     961,
+                     964
+                  ]
+               },
+               "("
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     965,
+                     968
+                  ]
+               },
+               "Alt",
+               []
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     969,
+                     972
+                  ]
+               },
+               ")"
+            ]
+         ]
+      ],
+      "Lex" : [
+         "define",
+         {
+            "sourceInterval" : [
+               714,
+               751
+            ]
+         },
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  724,
+                  751
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     724,
+                     732
                   ]
                },
                "Lex_lex",
@@ -1091,8 +547,8 @@
                "app",
                {
                   "sourceInterval" : [
-                     736,
-                     740
+                     747,
+                     751
                   ]
                },
                "Base",
@@ -1100,132 +556,458 @@
             ]
          ]
       ],
-      "Iter" : [
+      "ident" : [
          "define",
-         {},
+         {
+            "sourceInterval" : [
+               1304,
+               1337
+            ]
+         },
+         "an identifier",
+         [],
+         [
+            "app",
+            {
+               "sourceInterval" : [
+                  1333,
+                  1337
+               ]
+            },
+            "name",
+            []
+         ]
+      ],
+      "Base" : [
+         "define",
+         {
+            "sourceInterval" : [
+               755,
+               1016
+            ]
+         },
          null,
          [],
          [
             "alt",
             {
                "sourceInterval" : [
-                  556,
-                  631
+                  766,
+                  1016
                ]
             },
             [
                "app",
                {
                   "sourceInterval" : [
-                     556,
-                     564
+                     766,
+                     811
                   ]
                },
-               "Iter_star",
+               "Base_application",
                []
             ],
             [
                "app",
                {
                   "sourceInterval" : [
-                     580,
-                     588
+                     834,
+                     870
                   ]
                },
-               "Iter_plus",
+               "Base_range",
                []
             ],
             [
                "app",
                {
                   "sourceInterval" : [
-                     604,
-                     612
+                     896,
+                     904
                   ]
                },
-               "Iter_opt",
+               "Base_terminal",
                []
             ],
             [
                "app",
                {
                   "sourceInterval" : [
-                     627,
-                     631
+                     961,
+                     972
                   ]
                },
-               "Pred",
+               "Base_paren",
                []
             ]
          ]
       ],
-      "Pred" : [
+      "punctuation" : [
          "define",
-         {},
+         {
+            "sourceInterval" : [
+               2381,
+               2417
+            ]
+         },
          null,
          [],
          [
             "alt",
             {
                "sourceInterval" : [
-                  646,
-                  699
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     646,
-                     653
-                  ]
-               },
-               "Pred_not",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     668,
-                     675
-                  ]
-               },
-               "Pred_lookahead",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     696,
-                     699
-                  ]
-               },
-               "Lex",
-               []
-            ]
-         ]
-      ],
-      "Formals" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "seq",
-            {
-               "sourceInterval" : [
-                  427,
-                  453
+                  2395,
+                  2417
                ]
             },
             [
                "terminal",
                {
                   "sourceInterval" : [
-                     427,
-                     430
+                     2395,
+                     2398
+                  ]
+               },
+               "<"
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2401,
+                     2404
+                  ]
+               },
+               ">"
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2407,
+                     2410
+                  ]
+               },
+               ","
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2413,
+                     2417
+                  ]
+               },
+               "--"
+            ]
+         ]
+      ],
+      "terminal" : [
+         "define",
+         {
+            "sourceInterval" : [
+               1341,
+               1379
+            ]
+         },
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  1356,
+                  1379
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     1356,
+                     1360
+                  ]
+               },
+               "\""
+            ],
+            [
+               "star",
+               {
+                  "sourceInterval" : [
+                     1361,
+                     1374
+                  ]
+               },
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        1361,
+                        1373
+                     ]
+                  },
+                  "terminalChar",
+                  []
+               ]
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     1375,
+                     1379
+                  ]
+               },
+               "\""
+            ]
+         ]
+      ],
+      "token" : [
+         "define",
+         {
+            "sourceInterval" : [
+               2232,
+               2308
+            ]
+         },
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  2240,
+                  2308
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2240,
+                     2248
+                  ]
+               },
+               "caseName",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2251,
+                     2258
+                  ]
+               },
+               "comment",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2261,
+                     2266
+                  ]
+               },
+               "ident",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2269,
+                     2277
+                  ]
+               },
+               "operator",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2280,
+                     2291
+                  ]
+               },
+               "punctuation",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2294,
+                     2302
+                  ]
+               },
+               "terminal",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2305,
+                     2308
+                  ]
+               },
+               "any",
+               []
+            ]
+         ]
+      ],
+      "oneCharTerminal" : [
+         "define",
+         {
+            "sourceInterval" : [
+               1383,
+               1427
+            ]
+         },
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  1405,
+                  1427
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     1405,
+                     1409
+                  ]
+               },
+               "\""
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1410,
+                     1422
+                  ]
+               },
+               "terminalChar",
+               []
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     1423,
+                     1427
+                  ]
+               },
+               "\""
+            ]
+         ]
+      ],
+      "escapeChar_unicodeEscape" : [
+         "define",
+         {
+            "sourceInterval" : [
+               1967,
+               2026
+            ]
+         },
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  1967,
+                  2008
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     1967,
+                     1972
+                  ]
+               },
+               "\\u"
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1973,
+                     1981
+                  ]
+               },
+               "hexDigit",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1982,
+                     1990
+                  ]
+               },
+               "hexDigit",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1991,
+                     1999
+                  ]
+               },
+               "hexDigit",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2000,
+                     2008
+                  ]
+               },
+               "hexDigit",
+               []
+            ]
+         ]
+      ],
+      "Params" : [
+         "define",
+         {
+            "sourceInterval" : [
+               458,
+               495
+            ]
+         },
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  471,
+                  495
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     471,
+                     474
                   ]
                },
                "<"
@@ -1234,8 +1016,8 @@
                "app",
                {
                   "sourceInterval" : [
-                     431,
-                     449
+                     475,
+                     491
                   ]
                },
                "ListOf",
@@ -1244,19 +1026,19 @@
                      "app",
                      {
                         "sourceInterval" : [
-                           438,
-                           443
+                           482,
+                           485
                         ]
                      },
-                     "ident",
+                     "Seq",
                      []
                   ],
                   [
                      "terminal",
                      {
                         "sourceInterval" : [
-                           445,
-                           448
+                           487,
+                           490
                         ]
                      },
                      ","
@@ -1267,185 +1049,474 @@
                "terminal",
                {
                   "sourceInterval" : [
-                     450,
-                     453
+                     492,
+                     495
                   ]
                },
                ">"
             ]
          ]
       ],
-      "escapeChar_unicodeEscape" : [
+      "Formals" : [
          "define",
-         {},
+         {
+            "sourceInterval" : [
+               414,
+               454
+            ]
+         },
          null,
          [],
          [
             "seq",
             {
                "sourceInterval" : [
-                  1908,
-                  1949
+                  428,
+                  454
                ]
             },
             [
                "terminal",
                {
                   "sourceInterval" : [
-                     1908,
-                     1913
+                     428,
+                     431
                   ]
                },
-               "\\u"
+               "<"
             ],
             [
                "app",
                {
                   "sourceInterval" : [
-                     1914,
-                     1922
+                     432,
+                     450
                   ]
                },
-               "hexDigit",
+               "ListOf",
+               [
+                  [
+                     "app",
+                     {
+                        "sourceInterval" : [
+                           439,
+                           444
+                        ]
+                     },
+                     "ident",
+                     []
+                  ],
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           446,
+                           449
+                        ]
+                     },
+                     ","
+                  ]
+               ]
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     451,
+                     454
+                  ]
+               },
+               ">"
+            ]
+         ]
+      ],
+      "escapeChar_backspace" : [
+         "define",
+         {
+            "sourceInterval" : [
+               1721,
+               1776
+            ]
+         },
+         null,
+         [],
+         [
+            "terminal",
+            {
+               "sourceInterval" : [
+                  1721,
+                  1726
+               ]
+            },
+            "\\b"
+         ]
+      ],
+      "Grammar" : [
+         "define",
+         {
+            "sourceInterval" : [
+               36,
+               83
+            ]
+         },
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  50,
+                  83
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     50,
+                     55
+                  ]
+               },
+               "ident",
                []
             ],
             [
+               "opt",
+               {
+                  "sourceInterval" : [
+                     56,
+                     69
+                  ]
+               },
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        56,
+                        68
+                     ]
+                  },
+                  "SuperGrammar",
+                  []
+               ]
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     70,
+                     73
+                  ]
+               },
+               "{"
+            ],
+            [
+               "star",
+               {
+                  "sourceInterval" : [
+                     74,
+                     79
+                  ]
+               },
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        74,
+                        78
+                     ]
+                  },
+                  "Rule",
+                  []
+               ]
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     80,
+                     83
+                  ]
+               },
+               "}"
+            ]
+         ]
+      ],
+      "name" : [
+         "define",
+         {
+            "sourceInterval" : [
+               1190,
+               1230
+            ]
+         },
+         "a name",
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  1211,
+                  1230
+               ]
+            },
+            [
                "app",
                {
                   "sourceInterval" : [
-                     1923,
-                     1931
+                     1211,
+                     1220
                   ]
                },
-               "hexDigit",
+               "nameFirst",
                []
+            ],
+            [
+               "star",
+               {
+                  "sourceInterval" : [
+                     1221,
+                     1230
+                  ]
+               },
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        1221,
+                        1229
+                     ]
+                  },
+                  "nameRest",
+                  []
+               ]
+            ]
+         ]
+      ],
+      "Base_range" : [
+         "define",
+         {
+            "sourceInterval" : [
+               834,
+               889
+            ]
+         },
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  834,
+                  870
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     834,
+                     849
+                  ]
+               },
+               "oneCharTerminal",
+               []
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     850,
+                     854
+                  ]
+               },
+               ".."
             ],
             [
                "app",
                {
                   "sourceInterval" : [
-                     1932,
-                     1940
+                     855,
+                     870
                   ]
                },
-               "hexDigit",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1941,
-                     1949
-                  ]
-               },
-               "hexDigit",
+               "oneCharTerminal",
                []
             ]
          ]
       ],
-      "TopLevelTerm" : [
+      "Pred_not" : [
          "define",
-         {},
+         {
+            "sourceInterval" : [
+               657,
+               672
+            ]
+         },
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  657,
+                  664
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     657,
+                     660
+                  ]
+               },
+               "~"
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     661,
+                     664
+                  ]
+               },
+               "Lex",
+               []
+            ]
+         ]
+      ],
+      "escapeChar_carriageReturn" : [
+         "define",
+         {
+            "sourceInterval" : [
+               1844,
+               1904
+            ]
+         },
+         null,
+         [],
+         [
+            "terminal",
+            {
+               "sourceInterval" : [
+                  1844,
+                  1849
+               ]
+            },
+            "\\r"
+         ]
+      ],
+      "Alt" : [
+         "define",
+         {
+            "sourceInterval" : [
+               499,
+               533
+            ]
+         },
+         null,
+         [],
+         [
+            "app",
+            {
+               "sourceInterval" : [
+                  509,
+                  533
+               ]
+            },
+            "NonemptyListOf",
+            [
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        524,
+                        527
+                     ]
+                  },
+                  "Seq",
+                  []
+               ],
+               [
+                  "terminal",
+                  {
+                     "sourceInterval" : [
+                        529,
+                        532
+                     ]
+                  },
+                  "|"
+               ]
+            ]
+         ]
+      ],
+      "comment" : [
+         "define",
+         {
+            "sourceInterval" : [
+               2115,
+               2209
+            ]
+         },
          null,
          [],
          [
             "alt",
             {
                "sourceInterval" : [
-                  376,
-                  409
+                  2129,
+                  2209
                ]
             },
             [
                "app",
                {
                   "sourceInterval" : [
-                     376,
-                     388
+                     2129,
+                     2151
                   ]
                },
-               "TopLevelTerm_inline",
+               "comment_singleLine",
                []
             ],
             [
                "app",
                {
                   "sourceInterval" : [
-                     406,
-                     409
+                     2173,
+                     2195
                   ]
                },
-               "Seq",
+               "comment_multiLine",
                []
-            ]
-         ]
-      ],
-      "Base_paren" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "seq",
-            {
-               "sourceInterval" : [
-                  950,
-                  961
-               ]
-            },
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     950,
-                     953
-                  ]
-               },
-               "("
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     954,
-                     957
-                  ]
-               },
-               "Alt",
-               []
-            ],
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     958,
-                     961
-                  ]
-               },
-               ")"
             ]
          ]
       ],
       "Pred_lookahead" : [
          "define",
-         {},
+         {
+            "sourceInterval" : [
+               679,
+               700
+            ]
+         },
          null,
          [],
          [
             "seq",
             {
                "sourceInterval" : [
-                  668,
-                  675
+                  679,
+                  686
                ]
             },
             [
                "terminal",
                {
                   "sourceInterval" : [
-                     668,
-                     671
+                     679,
+                     682
                   ]
                },
                "&"
@@ -1454,8 +1525,8 @@
                "app",
                {
                   "sourceInterval" : [
-                     672,
-                     675
+                     683,
+                     686
                   ]
                },
                "Lex",
@@ -1463,70 +1534,274 @@
             ]
          ]
       ],
-      "comment_singleLine" : [
+      "Base_terminal" : [
          "define",
-         {},
+         {
+            "sourceInterval" : [
+               896,
+               954
+            ]
+         },
          null,
          [],
          [
-            "seq",
+            "app",
             {
                "sourceInterval" : [
-                  2070,
-                  2092
+                  896,
+                  904
+               ]
+            },
+            "terminal",
+            []
+         ]
+      ],
+      "nameRest" : [
+         "define",
+         {
+            "sourceInterval" : [
+               1270,
+               1300
+            ]
+         },
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  1285,
+                  1300
                ]
             },
             [
                "terminal",
                {
                   "sourceInterval" : [
-                     2070,
-                     2074
+                     1285,
+                     1288
                   ]
                },
-               "//"
+               "_"
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1295,
+                     1300
+                  ]
+               },
+               "alnum",
+               []
+            ]
+         ]
+      ],
+      "Iter_star" : [
+         "define",
+         {
+            "sourceInterval" : [
+               567,
+               584
+            ]
+         },
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  567,
+                  575
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     567,
+                     571
+                  ]
+               },
+               "Pred",
+               []
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     572,
+                     575
+                  ]
+               },
+               "*"
+            ]
+         ]
+      ],
+      "Iter" : [
+         "define",
+         {
+            "sourceInterval" : [
+               556,
+               642
+            ]
+         },
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  567,
+                  642
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     567,
+                     575
+                  ]
+               },
+               "Iter_star",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     591,
+                     599
+                  ]
+               },
+               "Iter_plus",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     615,
+                     623
+                  ]
+               },
+               "Iter_opt",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     638,
+                     642
+                  ]
+               },
+               "Pred",
+               []
+            ]
+         ]
+      ],
+      "Seq" : [
+         "define",
+         {
+            "sourceInterval" : [
+               537,
+               552
+            ]
+         },
+         null,
+         [],
+         [
+            "star",
+            {
+               "sourceInterval" : [
+                  547,
+                  552
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     547,
+                     551
+                  ]
+               },
+               "Iter",
+               []
+            ]
+         ]
+      ],
+      "comment_multiLine" : [
+         "define",
+         {
+            "sourceInterval" : [
+               2173,
+               2209
+            ]
+         },
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  2173,
+                  2195
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2173,
+                     2177
+                  ]
+               },
+               "/*"
             ],
             [
                "star",
                {
                   "sourceInterval" : [
-                     2075,
-                     2087
+                     2178,
+                     2190
                   ]
                },
                [
                   "seq",
                   {
                      "sourceInterval" : [
-                        2076,
-                        2085
+                        2179,
+                        2188
                      ]
                   },
                   [
                      "not",
                      {
                         "sourceInterval" : [
-                           2076,
-                           2081
+                           2179,
+                           2184
                         ]
                      },
                      [
                         "terminal",
                         {
                            "sourceInterval" : [
-                              2077,
-                              2081
+                              2180,
+                              2184
                            ]
                         },
-                        "\n"
+                        "*/"
                      ]
                   ],
                   [
                      "app",
                      {
                         "sourceInterval" : [
-                           2082,
-                           2085
+                           2185,
+                           2188
                         ]
                      },
                      "any",
@@ -1538,17 +1813,651 @@
                "terminal",
                {
                   "sourceInterval" : [
-                     2088,
-                     2092
+                     2191,
+                     2195
                   ]
                },
-               "\n"
+               "*/"
+            ]
+         ]
+      ],
+      "caseName" : [
+         "define",
+         {
+            "sourceInterval" : [
+               1118,
+               1186
+            ]
+         },
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  1133,
+                  1186
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     1133,
+                     1137
+                  ]
+               },
+               "--"
+            ],
+            [
+               "star",
+               {
+                  "sourceInterval" : [
+                     1138,
+                     1152
+                  ]
+               },
+               [
+                  "seq",
+                  {
+                     "sourceInterval" : [
+                        1139,
+                        1150
+                     ]
+                  },
+                  [
+                     "not",
+                     {
+                        "sourceInterval" : [
+                           1139,
+                           1144
+                        ]
+                     },
+                     [
+                        "terminal",
+                        {
+                           "sourceInterval" : [
+                              1140,
+                              1144
+                           ]
+                        },
+                        "\n"
+                     ]
+                  ],
+                  [
+                     "app",
+                     {
+                        "sourceInterval" : [
+                           1145,
+                           1150
+                        ]
+                     },
+                     "space",
+                     []
+                  ]
+               ]
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1153,
+                     1157
+                  ]
+               },
+               "name",
+               []
+            ],
+            [
+               "star",
+               {
+                  "sourceInterval" : [
+                     1158,
+                     1172
+                  ]
+               },
+               [
+                  "seq",
+                  {
+                     "sourceInterval" : [
+                        1159,
+                        1170
+                     ]
+                  },
+                  [
+                     "not",
+                     {
+                        "sourceInterval" : [
+                           1159,
+                           1164
+                        ]
+                     },
+                     [
+                        "terminal",
+                        {
+                           "sourceInterval" : [
+                              1160,
+                              1164
+                           ]
+                        },
+                        "\n"
+                     ]
+                  ],
+                  [
+                     "app",
+                     {
+                        "sourceInterval" : [
+                           1165,
+                           1170
+                        ]
+                     },
+                     "space",
+                     []
+                  ]
+               ]
+            ],
+            [
+               "alt",
+               {
+                  "sourceInterval" : [
+                     1174,
+                     1185
+                  ]
+               },
+               [
+                  "terminal",
+                  {
+                     "sourceInterval" : [
+                        1174,
+                        1178
+                     ]
+                  },
+                  "\n"
+               ],
+               [
+                  "lookahead",
+                  {
+                     "sourceInterval" : [
+                        1181,
+                        1185
+                     ]
+                  },
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           1182,
+                           1185
+                        ]
+                     },
+                     "}"
+                  ]
+               ]
+            ]
+         ]
+      ],
+      "escapeChar_backslash" : [
+         "define",
+         {
+            "sourceInterval" : [
+               1531,
+               1586
+            ]
+         },
+         null,
+         [],
+         [
+            "terminal",
+            {
+               "sourceInterval" : [
+                  1531,
+                  1537
+               ]
+            },
+            "\\\\"
+         ]
+      ],
+      "escapeChar_hexEscape" : [
+         "define",
+         {
+            "sourceInterval" : [
+               2033,
+               2088
+            ]
+         },
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  2033,
+                  2056
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2033,
+                     2038
+                  ]
+               },
+               "\\x"
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2039,
+                     2047
+                  ]
+               },
+               "hexDigit",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2048,
+                     2056
+                  ]
+               },
+               "hexDigit",
+               []
+            ]
+         ]
+      ],
+      "Iter_opt" : [
+         "define",
+         {
+            "sourceInterval" : [
+               615,
+               631
+            ]
+         },
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  615,
+                  623
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     615,
+                     619
+                  ]
+               },
+               "Pred",
+               []
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     620,
+                     623
+                  ]
+               },
+               "?"
+            ]
+         ]
+      ],
+      "escapeChar" : [
+         "define",
+         {
+            "sourceInterval" : [
+               1492,
+               2088
+            ]
+         },
+         "an escape sequence",
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  1531,
+                  2088
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1531,
+                     1537
+                  ]
+               },
+               "escapeChar_backslash",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1593,
+                     1599
+                  ]
+               },
+               "escapeChar_doubleQuote",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1657,
+                     1663
+                  ]
+               },
+               "escapeChar_singleQuote",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1721,
+                     1726
+                  ]
+               },
+               "escapeChar_backspace",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1783,
+                     1788
+                  ]
+               },
+               "escapeChar_lineFeed",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1844,
+                     1849
+                  ]
+               },
+               "escapeChar_carriageReturn",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1911,
+                     1916
+                  ]
+               },
+               "escapeChar_tab",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1967,
+                     2008
+                  ]
+               },
+               "escapeChar_unicodeEscape",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2033,
+                     2056
+                  ]
+               },
+               "escapeChar_hexEscape",
+               []
+            ]
+         ]
+      ],
+      "escapeChar_tab" : [
+         "define",
+         {
+            "sourceInterval" : [
+               1911,
+               1960
+            ]
+         },
+         null,
+         [],
+         [
+            "terminal",
+            {
+               "sourceInterval" : [
+                  1911,
+                  1916
+               ]
+            },
+            "\\t"
+         ]
+      ],
+      "Base_application" : [
+         "define",
+         {
+            "sourceInterval" : [
+               766,
+               827
+            ]
+         },
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  766,
+                  811
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     766,
+                     771
+                  ]
+               },
+               "ident",
+               []
+            ],
+            [
+               "opt",
+               {
+                  "sourceInterval" : [
+                     772,
+                     779
+                  ]
+               },
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        772,
+                        778
+                     ]
+                  },
+                  "Params",
+                  []
+               ]
+            ],
+            [
+               "not",
+               {
+                  "sourceInterval" : [
+                     780,
+                     811
+                  ]
+               },
+               [
+                  "alt",
+                  {
+                     "sourceInterval" : [
+                        782,
+                        810
+                     ]
+                  },
+                  [
+                     "seq",
+                     {
+                        "sourceInterval" : [
+                           782,
+                           796
+                        ]
+                     },
+                     [
+                        "opt",
+                        {
+                           "sourceInterval" : [
+                              782,
+                              792
+                           ]
+                        },
+                        [
+                           "app",
+                           {
+                              "sourceInterval" : [
+                                 782,
+                                 791
+                              ]
+                           },
+                           "ruleDescr",
+                           []
+                        ]
+                     ],
+                     [
+                        "terminal",
+                        {
+                           "sourceInterval" : [
+                              793,
+                              796
+                           ]
+                        },
+                        "="
+                     ]
+                  ],
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           799,
+                           803
+                        ]
+                     },
+                     ":="
+                  ],
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           806,
+                           810
+                        ]
+                     },
+                     "+="
+                  ]
+               ]
+            ]
+         ]
+      ],
+      "nameFirst" : [
+         "define",
+         {
+            "sourceInterval" : [
+               1234,
+               1266
+            ]
+         },
+         null,
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  1250,
+                  1266
+               ]
+            },
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     1250,
+                     1253
+                  ]
+               },
+               "_"
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1260,
+                     1266
+                  ]
+               },
+               "letter",
+               []
+            ]
+         ]
+      ],
+      "tokens" : [
+         "define",
+         {
+            "sourceInterval" : [
+               2213,
+               2228
+            ]
+         },
+         null,
+         [],
+         [
+            "star",
+            {
+               "sourceInterval" : [
+                  2222,
+                  2228
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     2222,
+                     2227
+                  ]
+               },
+               "token",
+               []
             ]
          ]
       ],
       "Rule" : [
          "define",
-         {},
+         {
+            "sourceInterval" : [
+               120,
+               297
+            ]
+         },
          null,
          [],
          [
@@ -1594,165 +2503,405 @@
             ]
          ]
       ],
-      "Iter_opt" : [
+      "escapeChar_doubleQuote" : [
          "define",
-         {},
+         {
+            "sourceInterval" : [
+               1593,
+               1650
+            ]
+         },
          null,
          [],
          [
-            "seq",
+            "terminal",
             {
                "sourceInterval" : [
-                  604,
-                  612
+                  1593,
+                  1599
                ]
             },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     604,
-                     608
-                  ]
-               },
-               "Pred",
-               []
-            ],
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     609,
-                     612
-                  ]
-               },
-               "?"
-            ]
+            "\\\""
          ]
       ],
-      "Alt" : [
+      "Pred" : [
          "define",
-         {},
-         null,
-         [],
-         [
-            "seq",
-            {
-               "sourceInterval" : [
-                  508,
-                  522
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     508,
-                     511
-                  ]
-               },
-               "Seq",
-               []
-            ],
-            [
-               "star",
-               {
-                  "sourceInterval" : [
-                     512,
-                     522
-                  ]
-               },
-               [
-                  "seq",
-                  {
-                     "sourceInterval" : [
-                        513,
-                        520
-                     ]
-                  },
-                  [
-                     "terminal",
-                     {
-                        "sourceInterval" : [
-                           513,
-                           516
-                        ]
-                     },
-                     "|"
-                  ],
-                  [
-                     "app",
-                     {
-                        "sourceInterval" : [
-                           517,
-                           520
-                        ]
-                     },
-                     "Seq",
-                     []
-                  ]
-               ]
+         {
+            "sourceInterval" : [
+               646,
+               710
             ]
-         ]
-      ],
-      "punctuation" : [
-         "define",
-         {},
+         },
          null,
          [],
          [
             "alt",
             {
                "sourceInterval" : [
-                  2336,
-                  2358
+                  657,
+                  710
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     657,
+                     664
+                  ]
+               },
+               "Pred_not",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     679,
+                     686
+                  ]
+               },
+               "Pred_lookahead",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     707,
+                     710
+                  ]
+               },
+               "Lex",
+               []
+            ]
+         ]
+      ],
+      "Rule_override" : [
+         "define",
+         {
+            "sourceInterval" : [
+               188,
+               240
+            ]
+         },
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  188,
+                  227
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     188,
+                     193
+                  ]
+               },
+               "ident",
+               []
+            ],
+            [
+               "opt",
+               {
+                  "sourceInterval" : [
+                     194,
+                     202
+                  ]
+               },
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        194,
+                        201
+                     ]
+                  },
+                  "Formals",
+                  []
+               ]
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     214,
+                     218
+                  ]
+               },
+               ":="
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     219,
+                     227
+                  ]
+               },
+               "RuleBody",
+               []
+            ]
+         ]
+      ],
+      "RuleBody" : [
+         "define",
+         {
+            "sourceInterval" : [
+               301,
+               354
+            ]
+         },
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  316,
+                  354
+               ]
+            },
+            [
+               "opt",
+               {
+                  "sourceInterval" : [
+                     316,
+                     320
+                  ]
+               },
+               [
+                  "terminal",
+                  {
+                     "sourceInterval" : [
+                        316,
+                        319
+                     ]
+                  },
+                  "|"
+               ]
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     321,
+                     354
+                  ]
+               },
+               "NonemptyListOf",
+               [
+                  [
+                     "app",
+                     {
+                        "sourceInterval" : [
+                           336,
+                           348
+                        ]
+                     },
+                     "TopLevelTerm",
+                     []
+                  ],
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           350,
+                           353
+                        ]
+                     },
+                     "|"
+                  ]
+               ]
+            ]
+         ]
+      ],
+      "ruleDescrText" : [
+         "define",
+         {
+            "sourceInterval" : [
+               1083,
+               1114
+            ]
+         },
+         null,
+         [],
+         [
+            "star",
+            {
+               "sourceInterval" : [
+                  1103,
+                  1114
+               ]
+            },
+            [
+               "seq",
+               {
+                  "sourceInterval" : [
+                     1104,
+                     1112
+                  ]
+               },
+               [
+                  "not",
+                  {
+                     "sourceInterval" : [
+                        1104,
+                        1108
+                     ]
+                  },
+                  [
+                     "terminal",
+                     {
+                        "sourceInterval" : [
+                           1105,
+                           1108
+                        ]
+                     },
+                     ")"
+                  ]
+               ],
+               [
+                  "app",
+                  {
+                     "sourceInterval" : [
+                        1109,
+                        1112
+                     ]
+                  },
+                  "any",
+                  []
+               ]
+            ]
+         ]
+      ],
+      "TopLevelTerm_inline" : [
+         "define",
+         {
+            "sourceInterval" : [
+               377,
+               400
+            ]
+         },
+         null,
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  377,
+                  389
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     377,
+                     380
+                  ]
+               },
+               "Seq",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     381,
+                     389
+                  ]
+               },
+               "caseName",
+               []
+            ]
+         ]
+      ],
+      "escapeChar_singleQuote" : [
+         "define",
+         {
+            "sourceInterval" : [
+               1657,
+               1714
+            ]
+         },
+         null,
+         [],
+         [
+            "terminal",
+            {
+               "sourceInterval" : [
+                  1657,
+                  1663
+               ]
+            },
+            "\\'"
+         ]
+      ],
+      "ruleDescr" : [
+         "define",
+         {
+            "sourceInterval" : [
+               1020,
+               1079
+            ]
+         },
+         "a rule description",
+         [],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  1058,
+                  1079
                ]
             },
             [
                "terminal",
                {
                   "sourceInterval" : [
-                     2336,
-                     2339
+                     1058,
+                     1061
                   ]
                },
-               "<"
+               "("
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     1062,
+                     1075
+                  ]
+               },
+               "ruleDescrText",
+               []
             ],
             [
                "terminal",
                {
                   "sourceInterval" : [
-                     2342,
-                     2345
+                     1076,
+                     1079
                   ]
                },
-               ">"
-            ],
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     2348,
-                     2351
-                  ]
-               },
-               ","
-            ],
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     2354,
-                     2358
-                  ]
-               },
-               "--"
+               ")"
             ]
          ]
       ],
       "Grammars" : [
          "define",
-         {},
+         {
+            "sourceInterval" : [
+               9,
+               32
+            ]
+         },
          null,
          [],
          [
@@ -1776,45 +2925,102 @@
             ]
          ]
       ],
-      "Lex_lex" : [
+      "comment_singleLine" : [
          "define",
-         {},
+         {
+            "sourceInterval" : [
+               2129,
+               2166
+            ]
+         },
          null,
          [],
          [
             "seq",
             {
                "sourceInterval" : [
-                  713,
-                  721
+                  2129,
+                  2151
                ]
             },
             [
                "terminal",
                {
                   "sourceInterval" : [
-                     713,
-                     716
+                     2129,
+                     2133
                   ]
                },
-               "#"
+               "//"
             ],
             [
-               "app",
+               "star",
                {
                   "sourceInterval" : [
-                     717,
-                     721
+                     2134,
+                     2146
                   ]
                },
-               "Base",
-               []
+               [
+                  "seq",
+                  {
+                     "sourceInterval" : [
+                        2135,
+                        2144
+                     ]
+                  },
+                  [
+                     "not",
+                     {
+                        "sourceInterval" : [
+                           2135,
+                           2140
+                        ]
+                     },
+                     [
+                        "terminal",
+                        {
+                           "sourceInterval" : [
+                              2136,
+                              2140
+                           ]
+                        },
+                        "\n"
+                     ]
+                  ],
+                  [
+                     "app",
+                     {
+                        "sourceInterval" : [
+                           2141,
+                           2144
+                        ]
+                     },
+                     "any",
+                     []
+                  ]
+               ]
+            ],
+            [
+               "terminal",
+               {
+                  "sourceInterval" : [
+                     2147,
+                     2151
+                  ]
+               },
+               "\n"
             ]
          ]
       ],
       "Rule_extend" : [
          "define",
-         {},
+         {
+            "sourceInterval" : [
+               247,
+               297
+            ]
+         },
          null,
          [],
          [
@@ -1879,989 +3085,66 @@
             ]
          ]
       ],
-      "nameFirst" : [
+      "Lex_lex" : [
          "define",
-         {},
-         null,
-         [],
-         [
-            "alt",
-            {
-               "sourceInterval" : [
-                  1239,
-                  1255
-               ]
-            },
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     1239,
-                     1242
-                  ]
-               },
-               "_"
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1249,
-                     1255
-                  ]
-               },
-               "letter",
-               []
+         {
+            "sourceInterval" : [
+               724,
+               740
             ]
-         ]
-      ],
-      "escapeChar_singleQuote" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "terminal",
-            {
-               "sourceInterval" : [
-                  1598,
-                  1604
-               ]
-            },
-            "\\'"
-         ]
-      ],
-      "tokens" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "star",
-            {
-               "sourceInterval" : [
-                  2163,
-                  2169
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     2163,
-                     2168
-                  ]
-               },
-               "token",
-               []
-            ]
-         ]
-      ],
-      "terminalChar" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "alt",
-            {
-               "sourceInterval" : [
-                  1391,
-                  1429
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1391,
-                     1401
-                  ]
-               },
-               "escapeChar",
-               []
-            ],
-            [
-               "seq",
-               {
-                  "sourceInterval" : [
-                     1408,
-                     1429
-                  ]
-               },
-               [
-                  "not",
-                  {
-                     "sourceInterval" : [
-                        1408,
-                        1413
-                     ]
-                  },
-                  [
-                     "terminal",
-                     {
-                        "sourceInterval" : [
-                           1409,
-                           1413
-                        ]
-                     },
-                     "\\"
-                  ]
-               ],
-               [
-                  "not",
-                  {
-                     "sourceInterval" : [
-                        1414,
-                        1419
-                     ]
-                  },
-                  [
-                     "terminal",
-                     {
-                        "sourceInterval" : [
-                           1415,
-                           1419
-                        ]
-                     },
-                     "\""
-                  ]
-               ],
-               [
-                  "not",
-                  {
-                     "sourceInterval" : [
-                        1420,
-                        1425
-                     ]
-                  },
-                  [
-                     "terminal",
-                     {
-                        "sourceInterval" : [
-                           1421,
-                           1425
-                        ]
-                     },
-                     "\n"
-                  ]
-               ],
-               [
-                  "app",
-                  {
-                     "sourceInterval" : [
-                        1426,
-                        1429
-                     ]
-                  },
-                  "any",
-                  []
-               ]
-            ]
-         ]
-      ],
-      "escapeChar_carriageReturn" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "terminal",
-            {
-               "sourceInterval" : [
-                  1785,
-                  1790
-               ]
-            },
-            "\\r"
-         ]
-      ],
-      "terminal" : [
-         "define",
-         {},
+         },
          null,
          [],
          [
             "seq",
             {
                "sourceInterval" : [
-                  1345,
-                  1368
+                  724,
+                  732
                ]
             },
             [
                "terminal",
                {
                   "sourceInterval" : [
-                     1345,
-                     1349
+                     724,
+                     727
                   ]
                },
-               "\""
-            ],
-            [
-               "star",
-               {
-                  "sourceInterval" : [
-                     1350,
-                     1363
-                  ]
-               },
-               [
-                  "app",
-                  {
-                     "sourceInterval" : [
-                        1350,
-                        1362
-                     ]
-                  },
-                  "terminalChar",
-                  []
-               ]
-            ],
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     1364,
-                     1368
-                  ]
-               },
-               "\""
-            ]
-         ]
-      ],
-      "RuleBody" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "seq",
-            {
-               "sourceInterval" : [
-                  316,
-                  353
-               ]
-            },
-            [
-               "opt",
-               {
-                  "sourceInterval" : [
-                     316,
-                     320
-                  ]
-               },
-               [
-                  "terminal",
-                  {
-                     "sourceInterval" : [
-                        316,
-                        319
-                     ]
-                  },
-                  "|"
-               ]
+               "#"
             ],
             [
                "app",
                {
                   "sourceInterval" : [
-                     321,
-                     333
+                     728,
+                     732
                   ]
                },
-               "TopLevelTerm",
-               []
-            ],
-            [
-               "star",
-               {
-                  "sourceInterval" : [
-                     334,
-                     353
-                  ]
-               },
-               [
-                  "seq",
-                  {
-                     "sourceInterval" : [
-                        335,
-                        351
-                     ]
-                  },
-                  [
-                     "terminal",
-                     {
-                        "sourceInterval" : [
-                           335,
-                           338
-                        ]
-                     },
-                     "|"
-                  ],
-                  [
-                     "app",
-                     {
-                        "sourceInterval" : [
-                           339,
-                           351
-                        ]
-                     },
-                     "TopLevelTerm",
-                     []
-                  ]
-               ]
-            ]
-         ]
-      ],
-      "Base" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "alt",
-            {
-               "sourceInterval" : [
-                  755,
-                  1005
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     755,
-                     800
-                  ]
-               },
-               "Base_application",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     823,
-                     845
-                  ]
-               },
-               "Base_range",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     885,
-                     893
-                  ]
-               },
-               "Base_terminal",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     950,
-                     961
-                  ]
-               },
-               "Base_paren",
+               "Base",
                []
             ]
          ]
       ],
-      "ident" : [
+      "escapeChar_lineFeed" : [
          "define",
-         {},
-         "an identifier",
-         [],
-         [
-            "app",
-            {
-               "sourceInterval" : [
-                  1322,
-                  1326
-               ]
-            },
-            "name",
-            []
-         ]
-      ],
-      "TopLevelTerm_inline" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "seq",
-            {
-               "sourceInterval" : [
-                  376,
-                  388
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     376,
-                     379
-                  ]
-               },
-               "Seq",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     380,
-                     388
-                  ]
-               },
-               "caseName",
-               []
+         {
+            "sourceInterval" : [
+               1783,
+               1837
             ]
-         ]
-      ],
-      "caseName" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "seq",
-            {
-               "sourceInterval" : [
-                  1122,
-                  1175
-               ]
-            },
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     1122,
-                     1126
-                  ]
-               },
-               "--"
-            ],
-            [
-               "star",
-               {
-                  "sourceInterval" : [
-                     1127,
-                     1141
-                  ]
-               },
-               [
-                  "seq",
-                  {
-                     "sourceInterval" : [
-                        1128,
-                        1139
-                     ]
-                  },
-                  [
-                     "not",
-                     {
-                        "sourceInterval" : [
-                           1128,
-                           1133
-                        ]
-                     },
-                     [
-                        "terminal",
-                        {
-                           "sourceInterval" : [
-                              1129,
-                              1133
-                           ]
-                        },
-                        "\n"
-                     ]
-                  ],
-                  [
-                     "app",
-                     {
-                        "sourceInterval" : [
-                           1134,
-                           1139
-                        ]
-                     },
-                     "space",
-                     []
-                  ]
-               ]
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1142,
-                     1146
-                  ]
-               },
-               "name",
-               []
-            ],
-            [
-               "star",
-               {
-                  "sourceInterval" : [
-                     1147,
-                     1161
-                  ]
-               },
-               [
-                  "seq",
-                  {
-                     "sourceInterval" : [
-                        1148,
-                        1159
-                     ]
-                  },
-                  [
-                     "not",
-                     {
-                        "sourceInterval" : [
-                           1148,
-                           1153
-                        ]
-                     },
-                     [
-                        "terminal",
-                        {
-                           "sourceInterval" : [
-                              1149,
-                              1153
-                           ]
-                        },
-                        "\n"
-                     ]
-                  ],
-                  [
-                     "app",
-                     {
-                        "sourceInterval" : [
-                           1154,
-                           1159
-                        ]
-                     },
-                     "space",
-                     []
-                  ]
-               ]
-            ],
-            [
-               "alt",
-               {
-                  "sourceInterval" : [
-                     1163,
-                     1174
-                  ]
-               },
-               [
-                  "terminal",
-                  {
-                     "sourceInterval" : [
-                        1163,
-                        1167
-                     ]
-                  },
-                  "\n"
-               ],
-               [
-                  "lookahead",
-                  {
-                     "sourceInterval" : [
-                        1170,
-                        1174
-                     ]
-                  },
-                  [
-                     "terminal",
-                     {
-                        "sourceInterval" : [
-                           1171,
-                           1174
-                        ]
-                     },
-                     "}"
-                  ]
-               ]
-            ]
-         ]
-      ],
-      "ruleDescr" : [
-         "define",
-         {},
-         "a rule description",
-         [],
-         [
-            "seq",
-            {
-               "sourceInterval" : [
-                  1047,
-                  1068
-               ]
-            },
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     1047,
-                     1050
-                  ]
-               },
-               "("
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1051,
-                     1064
-                  ]
-               },
-               "ruleDescrText",
-               []
-            ],
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     1065,
-                     1068
-                  ]
-               },
-               ")"
-            ]
-         ]
-      ],
-      "escapeChar_hexEscape" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "seq",
-            {
-               "sourceInterval" : [
-                  1974,
-                  1997
-               ]
-            },
-            [
-               "terminal",
-               {
-                  "sourceInterval" : [
-                     1974,
-                     1979
-                  ]
-               },
-               "\\x"
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1980,
-                     1988
-                  ]
-               },
-               "hexDigit",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     1989,
-                     1997
-                  ]
-               },
-               "hexDigit",
-               []
-            ]
-         ]
-      ],
-      "escapeChar_tab" : [
-         "define",
-         {},
+         },
          null,
          [],
          [
             "terminal",
             {
                "sourceInterval" : [
-                  1852,
-                  1857
+                  1783,
+                  1788
                ]
             },
-            "\\t"
-         ]
-      ],
-      "comment" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "alt",
-            {
-               "sourceInterval" : [
-                  2070,
-                  2150
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     2070,
-                     2092
-                  ]
-               },
-               "comment_singleLine",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     2114,
-                     2136
-                  ]
-               },
-               "comment_multiLine",
-               []
-            ]
-         ]
-      ],
-      "escapeChar_backslash" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "terminal",
-            {
-               "sourceInterval" : [
-                  1472,
-                  1478
-               ]
-            },
-            "\\\\"
-         ]
-      ],
-      "escapeChar_backspace" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "terminal",
-            {
-               "sourceInterval" : [
-                  1662,
-                  1667
-               ]
-            },
-            "\\b"
-         ]
-      ],
-      "ruleDescrText" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "star",
-            {
-               "sourceInterval" : [
-                  1092,
-                  1103
-               ]
-            },
-            [
-               "seq",
-               {
-                  "sourceInterval" : [
-                     1093,
-                     1101
-                  ]
-               },
-               [
-                  "not",
-                  {
-                     "sourceInterval" : [
-                        1093,
-                        1097
-                     ]
-                  },
-                  [
-                     "terminal",
-                     {
-                        "sourceInterval" : [
-                           1094,
-                           1097
-                        ]
-                     },
-                     ")"
-                  ]
-               ],
-               [
-                  "app",
-                  {
-                     "sourceInterval" : [
-                        1098,
-                        1101
-                     ]
-                  },
-                  "any",
-                  []
-               ]
-            ]
-         ]
-      ],
-      "Seq" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "star",
-            {
-               "sourceInterval" : [
-                  536,
-                  541
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     536,
-                     540
-                  ]
-               },
-               "Iter",
-               []
-            ]
-         ]
-      ],
-      "escapeChar_doubleQuote" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "terminal",
-            {
-               "sourceInterval" : [
-                  1534,
-                  1540
-               ]
-            },
-            "\\\""
-         ]
-      ],
-      "token" : [
-         "define",
-         {},
-         null,
-         [],
-         [
-            "alt",
-            {
-               "sourceInterval" : [
-                  2181,
-                  2249
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     2181,
-                     2189
-                  ]
-               },
-               "caseName",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     2192,
-                     2199
-                  ]
-               },
-               "comment",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     2202,
-                     2207
-                  ]
-               },
-               "ident",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     2210,
-                     2218
-                  ]
-               },
-               "operator",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     2221,
-                     2232
-                  ]
-               },
-               "punctuation",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     2235,
-                     2243
-                  ]
-               },
-               "terminal",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     2246,
-                     2249
-                  ]
-               },
-               "any",
-               []
-            ]
+            "\\n"
          ]
       ]
    }

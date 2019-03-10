@@ -7,167 +7,14 @@
    null,
    null,
    {
-      "hexDigit" : [
-         "define",
-         {},
-         "a hexadecimal digit",
-         [],
-         [
-            "alt",
-            {
-               "sourceInterval" : [
-                  219,
-                  254
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     219,
-                     224
-                  ]
-               },
-               "digit",
-               []
-            ],
-            [
-               "range",
-               {
-                  "sourceInterval" : [
-                     231,
-                     239
-                  ]
-               },
-               "a",
-               "f"
-            ],
-            [
-               "range",
-               {
-                  "sourceInterval" : [
-                     246,
-                     254
-                  ]
-               },
-               "A",
-               "F"
-            ]
-         ]
-      ],
-      "letter" : [
-         "define",
-         {},
-         "a letter",
-         [],
-         [
-            "alt",
-            {
-               "sourceInterval" : [
-                  107,
-                  142
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     107,
-                     112
-                  ]
-               },
-               "lower",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     119,
-                     124
-                  ]
-               },
-               "upper",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     131,
-                     142
-                  ]
-               },
-               "unicodeLtmo",
-               []
-            ]
-         ]
-      ],
-      "listOf" : [
-         "define",
-         {},
-         null,
-         [
-            "elem",
-            "sep"
-         ],
-         [
-            "alt",
-            {
-               "sourceInterval" : [
-                  462,
-                  516
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     462,
-                     487
-                  ]
-               },
-               "nonemptyListOf",
-               [
-                  [
-                     "param",
-                     {},
-                     0
-                  ],
-                  [
-                     "param",
-                     {},
-                     1
-                  ]
-               ]
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     494,
-                     516
-                  ]
-               },
-               "emptyListOf",
-               [
-                  [
-                     "param",
-                     {},
-                     0
-                  ],
-                  [
-                     "param",
-                     {},
-                     1
-                  ]
-               ]
-            ]
-         ]
-      ],
       "nonemptyListOf" : [
          "define",
-         {},
+         {
+            "sourceInterval" : [
+               520,
+               568
+            ]
+         },
          null,
          [
             "elem",
@@ -216,9 +63,158 @@
             ]
          ]
       ],
+      "emptyListOf" : [
+         "define",
+         {
+            "sourceInterval" : [
+               572,
+               614
+            ]
+         },
+         null,
+         [
+            "elem",
+            "sep"
+         ],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  616,
+                  616
+               ]
+            }
+         ]
+      ],
+      "alnum" : [
+         "define",
+         {
+            "sourceInterval" : [
+               18,
+               78
+            ]
+         },
+         "an alpha-numeric character",
+         [],
+         [
+            "alt",
+            {
+               "sourceInterval" : [
+                  60,
+                  78
+               ]
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     60,
+                     66
+                  ]
+               },
+               "letter",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     73,
+                     78
+                  ]
+               },
+               "digit",
+               []
+            ]
+         ]
+      ],
+      "EmptyListOf" : [
+         "define",
+         {
+            "sourceInterval" : [
+               392,
+               434
+            ]
+         },
+         null,
+         [
+            "elem",
+            "sep"
+         ],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  438,
+                  438
+               ]
+            }
+         ]
+      ],
+      "NonemptyListOf" : [
+         "define",
+         {
+            "sourceInterval" : [
+               340,
+               388
+            ]
+         },
+         null,
+         [
+            "elem",
+            "sep"
+         ],
+         [
+            "seq",
+            {
+               "sourceInterval" : [
+                  372,
+                  388
+               ]
+            },
+            [
+               "param",
+               {},
+               0
+            ],
+            [
+               "star",
+               {
+                  "sourceInterval" : [
+                     377,
+                     388
+                  ]
+               },
+               [
+                  "seq",
+                  {
+                     "sourceInterval" : [
+                        378,
+                        386
+                     ]
+                  },
+                  [
+                     "param",
+                     {},
+                     1
+                  ],
+                  [
+                     "param",
+                     {},
+                     0
+                  ]
+               ]
+            ]
+         ]
+      ],
       "ListOf" : [
          "define",
-         {},
+         {
+            "sourceInterval" : [
+               258,
+               336
+            ]
+         },
          null,
          [
             "elem",
@@ -278,89 +274,68 @@
             ]
          ]
       ],
-      "alnum" : [
+      "listOf" : [
          "define",
-         {},
-         "an alpha-numeric character",
-         [],
-         [
-            "alt",
-            {
-               "sourceInterval" : [
-                  60,
-                  78
-               ]
-            },
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     60,
-                     66
-                  ]
-               },
-               "letter",
-               []
-            ],
-            [
-               "app",
-               {
-                  "sourceInterval" : [
-                     73,
-                     78
-                  ]
-               },
-               "digit",
-               []
+         {
+            "sourceInterval" : [
+               438,
+               516
             ]
-         ]
-      ],
-      "NonemptyListOf" : [
-         "define",
-         {},
+         },
          null,
          [
             "elem",
             "sep"
          ],
          [
-            "seq",
+            "alt",
             {
                "sourceInterval" : [
-                  372,
-                  388
+                  462,
+                  516
                ]
             },
             [
-               "param",
-               {},
-               0
-            ],
-            [
-               "star",
+               "app",
                {
                   "sourceInterval" : [
-                     377,
-                     388
+                     462,
+                     487
                   ]
                },
+               "nonemptyListOf",
                [
-                  "seq",
-                  {
-                     "sourceInterval" : [
-                        378,
-                        386
-                     ]
-                  },
-                  [
-                     "param",
-                     {},
-                     1
-                  ],
                   [
                      "param",
                      {},
                      0
+                  ],
+                  [
+                     "param",
+                     {},
+                     1
+                  ]
+               ]
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     494,
+                     516
+                  ]
+               },
+               "emptyListOf",
+               [
+                  [
+                     "param",
+                     {},
+                     0
+                  ],
+                  [
+                     "param",
+                     {},
+                     1
                   ]
                ]
             ]
@@ -368,7 +343,12 @@
       ],
       "digit" : [
          "define",
-         {},
+         {
+            "sourceInterval" : [
+               146,
+               177
+            ]
+         },
          "a digit",
          [],
          [
@@ -383,40 +363,110 @@
             "9"
          ]
       ],
-      "EmptyListOf" : [
+      "letter" : [
          "define",
-         {},
-         null,
+         {
+            "sourceInterval" : [
+               82,
+               142
+            ]
+         },
+         "a letter",
+         [],
          [
-            "elem",
-            "sep"
-         ],
-         [
-            "seq",
+            "alt",
             {
                "sourceInterval" : [
-                  438,
-                  438
+                  107,
+                  142
                ]
-            }
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     107,
+                     112
+                  ]
+               },
+               "lower",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     119,
+                     124
+                  ]
+               },
+               "upper",
+               []
+            ],
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     131,
+                     142
+                  ]
+               },
+               "unicodeLtmo",
+               []
+            ]
          ]
       ],
-      "emptyListOf" : [
+      "hexDigit" : [
          "define",
-         {},
-         null,
+         {
+            "sourceInterval" : [
+               181,
+               254
+            ]
+         },
+         "a hexadecimal digit",
+         [],
          [
-            "elem",
-            "sep"
-         ],
-         [
-            "seq",
+            "alt",
             {
                "sourceInterval" : [
-                  616,
-                  616
+                  219,
+                  254
                ]
-            }
+            },
+            [
+               "app",
+               {
+                  "sourceInterval" : [
+                     219,
+                     224
+                  ]
+               },
+               "digit",
+               []
+            ],
+            [
+               "range",
+               {
+                  "sourceInterval" : [
+                     231,
+                     239
+                  ]
+               },
+               "a",
+               "f"
+            ],
+            [
+               "range",
+               {
+                  "sourceInterval" : [
+                     246,
+                     254
+                  ]
+               },
+               "A",
+               "F"
+            ]
          ]
       ]
    }
