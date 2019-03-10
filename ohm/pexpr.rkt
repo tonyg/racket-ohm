@@ -14,9 +14,6 @@
          (struct-out pexpr-seq)
 
          (struct-out pexpr-iter)
-         (struct-out pexpr-star)
-         (struct-out pexpr-plus)
-         (struct-out pexpr-opt)
 
          (struct-out pexpr-not)
          (struct-out pexpr-lookahead)
@@ -47,10 +44,7 @@
 (struct pexpr-alt pexpr (terms) #:transparent)
 (struct pexpr-seq pexpr (factors) #:transparent)
 
-(struct pexpr-iter pexpr (expr) #:transparent)
-(struct pexpr-star pexpr-iter () #:transparent)
-(struct pexpr-plus pexpr-iter () #:transparent)
-(struct pexpr-opt pexpr-iter () #:transparent)
+(struct pexpr-iter pexpr (expr min-count max-count) #:transparent)
 
 (struct pexpr-not pexpr (expr) #:transparent)
 (struct pexpr-lookahead pexpr (expr) #:transparent)
@@ -77,9 +71,7 @@
     [(? pexpr-param?) 1] ;; TODO: bogus?!?!
     [(pexpr-alt terms) (if (null? terms) 0 (pexpr-arity (car terms)))]
     [(pexpr-seq factors) (foldl + 0 (map pexpr-arity factors))]
-    [(pexpr-star inner-expr) (pexpr-arity inner-expr)]
-    [(pexpr-plus inner-expr) (pexpr-arity inner-expr)]
-    [(pexpr-opt inner-expr) (pexpr-arity inner-expr)]
+    [(pexpr-iter inner-expr _ _) (pexpr-arity inner-expr)]
     [(pexpr-not inner-expr) 0]
     [(pexpr-lookahead inner-expr) (pexpr-arity inner-expr)]
     [(pexpr-lex inner-expr) (pexpr-arity inner-expr)]
@@ -92,9 +84,7 @@
       [(pexpr-param index) (vector-ref env index)]
       [(pexpr-alt terms) (pexpr-alt (map walk terms))]
       [(pexpr-seq factors) (pexpr-seq (map walk factors))]
-      [(pexpr-star inner-expr) (pexpr-star (walk inner-expr))]
-      [(pexpr-plus inner-expr) (pexpr-plus (walk inner-expr))]
-      [(pexpr-opt inner-expr) (pexpr-opt (walk inner-expr))]
+      [(pexpr-iter inner-expr min max) (pexpr-iter (walk inner-expr) min max)]
       [(pexpr-not inner-expr) (pexpr-not (walk inner-expr))]
       [(pexpr-lookahead inner-expr) (pexpr-lookahead (walk inner-expr))]
       [(pexpr-lex inner-expr) (pexpr-lex (walk inner-expr))]

@@ -118,9 +118,9 @@
    ()
    [(Alt (NonemptyListOf s0 _ (#:seq ss))) (apply-if-many pexpr-alt (parse-expr (cons s0 ss)))]
    [(Seq es) (apply-if-many pexpr-seq (parse-expr es))]
-   [(Iter_star p _) (pexpr-star (parse-expr p))]
-   [(Iter_plus p _) (pexpr-plus (parse-expr p))]
-   [(Iter_opt p _) (pexpr-opt (parse-expr p))]
+   [(Iter_star p _) (pexpr-iter (parse-expr p) 0 #f)]
+   [(Iter_plus p _) (pexpr-iter (parse-expr p) 1 #f)]
+   [(Iter_opt p _) (pexpr-iter (parse-expr p) 0 1)]
    [(Pred_not _ p) (pexpr-not (parse-expr p))]
    [(Pred_lookahead _ p) (pexpr-lookahead (parse-expr p))]
    [(Lex_lex _ e) (pexpr-lex (parse-expr e))]

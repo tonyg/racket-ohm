@@ -162,15 +162,6 @@
     (and (eval-pexpr env expr)
          (reverse (current-bindings)))))
 
-(define (eval-pexpr-star env expr)
-  (let loop ((rows '()))
-    (define is (peek))
-    (define bs (eval-pexpr/bindings env expr))
-    (if bs
-        (loop (cons bs rows))
-        (begin0 (reverse rows)
-          (poke! is)))))
-
 (define-syntax with-restored-failure-info
   (syntax-rules ()
     [(_ body ...)
@@ -238,18 +229,18 @@
          ['() #t]
          [(cons factor rest)
           (and (eval-pexpr env factor) (loop rest))]))]
-    [(pexpr-star inner-expr)
-     (succeed/transpose is expr (eval-pexpr-star env inner-expr))]
-    [(pexpr-plus inner-expr)
-     (define r (eval-pexpr/bindings env inner-expr))
-     (and r (let ((rr (eval-pexpr-star env inner-expr)))
-              (succeed/transpose is expr (cons r rr))))]
-    [(pexpr-opt inner-expr)
-     (define r (eval-pexpr/bindings env inner-expr))
-     (if r
-         (succeed/transpose is expr (list r))
-         (begin (poke! is)
-                (succeed/transpose is expr '())))]
+    [(pexpr-iter inner-expr min-count max-count)
+     (succeed/transpose is expr
+                        (let loop ((rows '()) (count 0))
+                          (if (and max-count (= count max-count))
+                              (reverse rows)
+                              (let* ((is (peek))
+                                     (bs (eval-pexpr/bindings env inner-expr)))
+                                (if bs
+                                    (loop (cons bs rows) (+ count 1))
+                                    (and (>= count min-count)
+                                         (begin0 (reverse rows)
+                                           (poke! is))))))))]
     [(pexpr-not inner-expr)
      (if (with-restored-failure-info
            (with-ignored-bindings
@@ -329,7 +320,7 @@
     [(pexpr-param _) "something matching one of the parameters given to a parameterized rule"]
     [(pexpr-alt (list* p _)) (pexpr->expected p)]
     [(pexpr-seq (list* p _)) (pexpr->expected p)]
-    [(pexpr-iter p) (pexpr->expected p)]
+    [(pexpr-iter p _ _) (pexpr->expected p)]
     [(pexpr-not p) (string-append "anything but " (pexpr->expected p))]
     [(pexpr-lookahead p) (pexpr->expected p)]
     [(pexpr-lex p) (pexpr->expected p)]
