@@ -453,7 +453,12 @@
                    (syntax->list #'((node-pat body ...) ...)))
            [(ohm-nonterminal _ _ (list inner)) (loop inner)]
            [(ohm-sequence _ ns) (map loop ns)]
-           [(? list? ns) (map loop ns)]))]))
+           [(? list? ns) (map loop ns)]
+           [_
+            (local-require racket/pretty)
+            (error 'ohm-match
+                   "Error: unhandled case in semantics for:\n~a\n"
+                   (pretty-format n))]))]))
 
 (define-syntax (ohm-semantics stx)
   (syntax-case stx ()
