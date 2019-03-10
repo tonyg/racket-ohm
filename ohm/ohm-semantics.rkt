@@ -93,7 +93,7 @@
    [(Rule_extend (#:text name) maybe-formals _ body)
     (build-rule name 'Rule_extend maybe-formals '() body)]
 
-   [(RuleBody _ term _ (#:seq terms))
+   [(RuleBody _ (NonemptyListOf term _ (#:seq terms)))
     (define parsed-terms (flatten (parse-rule (cons term terms) rule-name formals rule-kind)))
     (cons (apply-if-many pexpr-alt (filter pexpr? parsed-terms))
           (filter rule-def? parsed-terms))]
@@ -116,7 +116,7 @@
 (define parse-expr
   (ohm-semantics
    ()
-   [(Alt s0 _ (#:seq ss)) (apply-if-many pexpr-alt (parse-expr (cons s0 ss)))]
+   [(Alt (NonemptyListOf s0 _ (#:seq ss))) (apply-if-many pexpr-alt (parse-expr (cons s0 ss)))]
    [(Seq es) (apply-if-many pexpr-seq (parse-expr es))]
    [(Iter_star p _) (pexpr-star (parse-expr p))]
    [(Iter_plus p _) (pexpr-plus (parse-expr p))]
@@ -133,6 +133,7 @@
    [(Params _ ps _) (parse-expr ps)]
    [(NonemptyListOf e0 _ (#:seq es)) (parse-expr (cons e0 es))]
    [(EmptyListOf) '()]
+   [(oneCharTerminal _ (#:text escaped) _) (unescape-string escaped)]
    [(terminal _ (#:text escaped) _) (unescape-string escaped)]))
 
 (define (unescape-string s)
